@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineLeft"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.42" />
+
+    <!-- BG -->
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="-10dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/sign_in_background"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <Spinner
+        android:id="@+id/login_spinner_language"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginBottom="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/login_image_logo"
+        android:layout_width="170dp"
+        android:layout_height="170dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginTop="44dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.49"
+        app:layout_constraintStart_toEndOf="@+id/login_menu"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/login_menu"
+        android:layout_width="465dp"
+        android:layout_height="275dp"
+        android:background="#11ffffff"
+
+        android:translationZ="-1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.101"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.566"
+        app:layout_constraintWidth_max="480dp" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="14dp"
+        android:text="@string/app_based_on"
+        android:textColor="#bababa"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/login_spinner_language" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_short_name"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/login_menu"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.52" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="1dp"
+        android:text="@string/login_online_username_hint"
+        app:layout_constraintBottom_toTopOf="@+id/login_edit_email"
+        app:layout_constraintStart_toStartOf="@+id/login_edit_email" />
+
+    <com.kdt.mcgui.MineEditText
+        android:id="@+id/login_edit_email"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_margin="20dp"
+        android:imeOptions="flagNoExtractUi"
+        android:inputType="textEmailAddress"
+        app:layout_constraintBottom_toBottomOf="@+id/login_menu"
+        app:layout_constraintEnd_toEndOf="@+id/login_menu"
+        app:layout_constraintStart_toStartOf="@+id/login_menu"
+        app:layout_constraintTop_toTopOf="@+id/login_menu"
+        app:layout_constraintVertical_bias="0.1" />
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/login_online_password_hint"
+        app:layout_constraintBottom_toTopOf="@+id/textInputLayout"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout"
+        app:layout_constraintTop_toTopOf="@+id/textInputLayout"
+        app:layout_constraintVertical_bias="1" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        app:layout_constraintBottom_toBottomOf="@+id/login_menu"
+        app:layout_constraintEnd_toEndOf="@+id/login_edit_email"
+
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/login_edit_email"
+        app:layout_constraintTop_toBottomOf="@+id/login_edit_email"
+        app:layout_constraintVertical_bias="0.15"
+        app:passwordToggleEnabled="true"
+        app:passwordToggleTint="@android:color/white">
+
+        <com.kdt.mcgui.MineEditText
+            android:id="@+id/login_edit_password"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:imeOptions="flagNoExtractUi"
+            android:inputType="textPassword" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <CheckBox
+        android:id="@+id/login_switch_remember"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="13dp"
+        android:text="@string/login_online_check_keeplogin"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+    <com.kdt.mcgui.MineButton
+        android:id="@+id/mineButton"
+        android:layout_width="0dp"
+        android:layout_height="42dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginRight="11dp"
+        android:background="@drawable/mine_button_background"
+
+        android:onClick="loginMC"
+        android:text="@string/login_online_login_label"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toStartOf="@+id/guidelineLeft"
+        app:layout_constraintHorizontal_bias="0.645"
+        app:layout_constraintStart_toStartOf="@+id/login_menu"
+        app:layout_constraintTop_toBottomOf="@+id/login_switch_remember" />
+
+    <com.kdt.mcgui.MineButton
+        android:id="@+id/mineButton2"
+        android:layout_width="0dp"
+        android:layout_height="42dp"
+        android:layout_marginLeft="5dp"
+        android:background="@drawable/mine_button_background"
+        android:onClick="registerButton"
+        android:text="@string/login_registration_button"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/mineButton"
+        app:layout_constraintEnd_toEndOf="@+id/textInputLayout"
+        app:layout_constraintStart_toStartOf="@+id/guidelineLeft"
+        app:layout_constraintTop_toTopOf="@+id/mineButton" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="159dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="19dp"
+        android:text="@string/login_forgot_password"
+        android:textAlignment="center"
+        android:onClick="forgotPassword"
+        app:layout_constraintStart_toEndOf="@+id/login_switch_remember"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

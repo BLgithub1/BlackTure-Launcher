@@ -2,14 +2,9 @@ package net.kdt.pojavlaunch.utils;
 
 import android.app.*;
 import android.content.*;
-import android.opengl.EGL14;
-import android.opengl.EGLExt;
-import android.opengl.GLES10;
 import android.system.*;
 import android.util.*;
 import android.widget.Toast;
-
-import androidx.annotation.Nullable;
 
 import com.oracle.dalvik.*;
 import java.io.*;
@@ -23,12 +18,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 
-public class JREUtils
-{
-    private JREUtils() {}
-    
+public class JREUtils {
     public static String JRE_ARCHITECTURE;
-    
     public static String LD_LIBRARY_PATH;
     private static String nativeLibDir;
 
@@ -68,7 +59,6 @@ public class JREUtils
         return ret;
     }
     public static void initJavaRuntime() {
-
         dlopen(findInLdLibPath("libjli.so"));
         dlopen(findInLdLibPath("libjvm.so"));
         dlopen(findInLdLibPath("libverify.so"));
@@ -80,6 +70,7 @@ public class JREUtils
         dlopen(findInLdLibPath("libawt_headless.so"));
         dlopen(findInLdLibPath("libfreetype.so"));
         dlopen(findInLdLibPath("libfontmanager.so"));
+
         for(File f : locateLibs(new File(Tools.DIR_HOME_JRE + "/" + Tools.DIRNAME_HOME_JRE))) {
             dlopen(f.getAbsolutePath());
         }

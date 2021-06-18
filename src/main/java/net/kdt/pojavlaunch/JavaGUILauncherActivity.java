@@ -10,8 +10,10 @@ import android.widget.*;
 import java.io.*;
 import java.util.*;
 import net.kdt.pojavlaunch.prefs.*;
-import net.kdt.pojavlaunch.utils.*;
+
 import org.lwjgl.glfw.*;
+
+import net.kdt.pojavlaunch.utils.JREUtils;
 
 import static net.kdt.pojavlaunch.utils.MathUtils.map;
 

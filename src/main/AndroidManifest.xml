@@ -10,7 +10,7 @@
 
     <application
         android:allowBackup="true"
-        android:name=".Application"
+        android:name="ru.obvilion.launcher.Application"
         android:theme="@style/AppTheme"
         android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"

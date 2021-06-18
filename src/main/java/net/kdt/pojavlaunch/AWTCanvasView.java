@@ -6,8 +6,10 @@ import android.text.*;
 import android.util.*;
 import android.view.*;
 import java.util.*;
-import net.kdt.pojavlaunch.utils.*;
+
 import org.lwjgl.glfw.*;
+
+import net.kdt.pojavlaunch.utils.JREUtils;
 
 public class AWTCanvasView extends TextureView implements TextureView.SurfaceTextureListener, Runnable {
     private int mScaleFactor;

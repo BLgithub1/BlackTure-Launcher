@@ -8,8 +8,6 @@ import android.util.Log;
 import com.google.gson.JsonSyntaxException;
 import java.io.File;
 import java.io.IOException;
-import net.kdt.pojavlaunch.authenticator.mojang.RefreshListener;
-import net.kdt.pojavlaunch.authenticator.mojang.RefreshTokenTask;
 import net.kdt.pojavlaunch.value.MinecraftAccount;
 
 public class Profile
@@ -103,9 +101,5 @@ public class Profile
 
         Intent intent = new Intent(ctx, LauncherActivity.class); //MCLauncherActivity.class);
         ctx.startActivity(intent);
-    }
-
-    public static void updateTokens(final Activity ctx, final String name, RefreshListener listen) throws Exception {
-        new RefreshTokenTask(ctx, listen).execute(name);
     }
 }

@@ -22,6 +22,8 @@ import org.apache.commons.codec.binary.Hex;
 import org.lwjgl.glfw.*;
 import android.view.*;
 
+import net.kdt.pojavlaunch.utils.JREUtils;
+
 import static android.os.Build.VERSION_CODES.P;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_IGNORE_NOTCH;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_NOTCH_SIZE;
@@ -35,7 +37,7 @@ public final class Tools
     public static final Gson GLOBAL_GSON = new GsonBuilder().setPrettyPrinting().create();
     
     public static final String URL_HOME = "https://pojavlauncherteam.github.io/PojavLauncher";
-    public static String DIR_DATA = "/data/data/" + BuildConfig.APPLICATION_ID;
+    public static String DIR_DATA;
     public static String CURRENT_ARCHITECTURE;
 
     // New since 3.3.1

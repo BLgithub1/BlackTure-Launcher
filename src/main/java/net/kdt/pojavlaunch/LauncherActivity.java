@@ -61,7 +61,7 @@ public class LauncherActivity extends BaseLauncherActivity {
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.launcher_main_v4);
+        setContentView(R.layout.launcher_menu);
 
         if (BuildConfig.DEBUG) {
             Toast.makeText(this, "Launcher process id: " + android.os.Process.myPid(), Toast.LENGTH_LONG).show();

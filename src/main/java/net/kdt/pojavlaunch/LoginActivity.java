@@ -22,7 +22,6 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -46,17 +45,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Locale;
-import net.kdt.pojavlaunch.authenticator.microsoft.MicrosoftAuthTask;
-import net.kdt.pojavlaunch.authenticator.mojang.RefreshListener;
 import net.kdt.pojavlaunch.customcontrols.CustomControls;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.utils.JREUtils;
 import net.kdt.pojavlaunch.utils.LocaleUtils;
 import net.kdt.pojavlaunch.value.MinecraftAccount;
-import net.kdt.pojavlaunch.value.MinecraftClientInfo;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -66,9 +60,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-public class LoginActivity extends BaseActivity
-// MineActivity
-{
+public class LoginActivity extends BaseActivity {
     private final Object mLockStoragePerm = new Object();
     private final Object mLockSelectJRE = new Object();
     
@@ -93,16 +85,6 @@ public class LoginActivity extends BaseActivity
         new InitTask().execute(isSkipInit);
     }
 
-    public void forgotPassword(View view) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://obvilionnetwork.ru/auth/resetpassword"));
-        startActivity(browserIntent);
-    }
-
-    public void registerButton(View view) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://obvilionnetwork.ru/auth/signup"));
-        startActivity(browserIntent);
-    }
-
     private class InitTask extends AsyncTask<Boolean, String, Integer> {
         private AlertDialog startAle;
         private ProgressBar progress;
@@ -110,13 +92,12 @@ public class LoginActivity extends BaseActivity
         @Override
         protected void onPreExecute() {
             LinearLayout startScr = new LinearLayout(LoginActivity.this);
-            LayoutInflater.from(LoginActivity.this).inflate(R.layout.start_screen, startScr);
+            LayoutInflater.from(LoginActivity.this).inflate(R.layout.launcher_start_screen, startScr);
 
             FontChanger.changeFonts(startScr);
 
             progress = (ProgressBar) startScr.findViewById(R.id.startscreenProgress);
             startupTextView = (TextView) startScr.findViewById(R.id.startscreen_text);
-
 
             AlertDialog.Builder startDlg = new AlertDialog.Builder(LoginActivity.this, R.style.AppTheme);
             startDlg.setView(startScr);
@@ -128,6 +109,8 @@ public class LoginActivity extends BaseActivity
                 WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT
             );
+
+            setContentView(R.layout.launcher_start_screen);
         }
         
         private int revokeCount = -1;
@@ -186,7 +169,7 @@ public class LoginActivity extends BaseActivity
     }
     
     private void uiInit() {
-        setContentView(R.layout.launcher_login_v3);
+        setContentView(R.layout.launcher_login);
 
         Spinner spinnerChgLang = findViewById(R.id.login_spinner_language);
 
@@ -406,20 +389,18 @@ public class LoginActivity extends BaseActivity
         }
 
         try {
-            System.out.println("Downlaoding java");
             Tools.downloadFileMonitored(
                     "https://obvilionnetwork.ru/api/files/java/universal.tar.xz",
                     rtUniversal.getPath(),
                     new Tools.DownloaderFeedback() {
                         @Override
                         public void updateProgress(int curr, int max) {
-                            System.out.println(curr + " " + max);
+
                         }
                     }
             );
-            System.out.println("Downlaoding jvav completed");
         } catch (IOException e) {
-            System.out.println("oof");
+
         }
 
         try {
@@ -430,20 +411,18 @@ public class LoginActivity extends BaseActivity
         }
 
         try {
-            System.out.println("Downlaoding bin");
             Tools.downloadFileMonitored(
                     "https://obvilionnetwork.ru/api/files/java/bin-" + Tools.CURRENT_ARCHITECTURE.split("/")[0] + ".tar.xz",
                     rtPlatformDependent.getPath(),
                     new Tools.DownloaderFeedback() {
                         @Override
                         public void updateProgress(int curr, int max) {
-                            System.out.println(curr + " " + max);
+
                         }
                     }
             );
-            System.out.println("Downlaoding bin completed");
         } catch (IOException e) {
-            System.out.println("oof");
+
         }
 
         try {
@@ -579,183 +558,13 @@ public class LoginActivity extends BaseActivity
         tarIn.close();
     }
     
-    private static boolean mkdirs(String path)
-    {
+    private static boolean mkdirs(String path) {
         File file = new File(path);
         // check necessary???
         if(file.getParentFile().exists())
              return file.mkdir();
         else return file.mkdirs();
     }
-    
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        
-        Uri data = intent.getData();
-        //Log.i("MicroAuth", data.toString());
-        if (data != null && data.getScheme().equals("ms-xal-00000000402b5328") && data.getHost().equals("auth")) {
-            String error = data.getQueryParameter("error");
-            String error_description = data.getQueryParameter("error_description");
-            if (error != null) {
-                // "The user has denied access to the scope requested by the client application": user pressed Cancel button, skip it
-                if (!error_description.startsWith("The user has denied access to the scope requested by the client application")) {
-                    Toast.makeText(this, "Error: " + error + ": " + error_description, Toast.LENGTH_LONG).show();
-                }
-            } else {
-                String code = data.getQueryParameter("code");
-                new MicrosoftAuthTask(this, new RefreshListener(){
-                        @Override
-                        public void onFailed(Throwable e) {
-                            Tools.showError(LoginActivity.this, e);
-                        }
-
-                        @Override
-                        public void onSuccess(MinecraftAccount b) {
-                            mProfile = b;
-                            playProfile(false);
-                        }
-                    }).execute("false", code);
-                // Toast.makeText(this, "Logged in to Microsoft account, but NYI", Toast.LENGTH_LONG).show();
-            }
-        }
-    }
-    
-    private View getViewFromList(int pos, ListView listView) {
-        final int firstItemPos = listView.getFirstVisiblePosition();
-        final int lastItemPos = firstItemPos + listView.getChildCount() - 1;
-
-        if (pos < firstItemPos || pos > lastItemPos ) {
-            return listView.getAdapter().getView(pos, null, listView);
-        } else {
-            final int childIndex = pos - firstItemPos;
-            return listView.getChildAt(childIndex);
-        }
-    }
-    
-//    public void loginSavedAcc(View view) {
-//        String[] accountArr = new File(Tools.DIR_ACCOUNT_NEW).list();
-//        if(accountArr.length == 0){
-//           showNoAccountDialog();
-//           return;
-//        }
-//
-//        final Dialog accountDialog = new Dialog(PojavLoginActivity.this);
-//
-//        accountDialog.setContentView(R.layout.simple_account_list_holder);
-//
-//        LinearLayout accountListLayout = accountDialog.findViewById(R.id.accountListLayout);
-//        LayoutInflater inflater = (LayoutInflater) this.getSystemService(LAYOUT_INFLATER_SERVICE);
-//
-//        for (int accountIndex = 0; accountIndex < accountArr.length; accountIndex++) {
-//            String s = accountArr[accountIndex];
-//            View child = inflater.inflate(R.layout.simple_account_list_item, null);
-//            TextView accountName = child.findViewById(R.id.accountitem_text_name);
-//            ImageButton removeButton = child.findViewById(R.id.accountitem_button_remove);
-//            ImageView imageView = child.findViewById(R.id.account_head);
-//
-//            String accNameStr = s.substring(0, s.length() - 5);
-//            String skinFaceBase64 = MinecraftAccount.load(accNameStr).skinFaceBase64;
-//            if (skinFaceBase64 != null) {
-//                byte[] faceIconBytes = Base64.decode(skinFaceBase64, Base64.DEFAULT);
-//                Bitmap bitmap = BitmapFactory.decodeByteArray(faceIconBytes, 0, faceIconBytes.length);
-//
-//                imageView.setImageDrawable(new BitmapDrawable(getResources(),
-//                        bitmap));
-//            }
-//            accountName.setText(accNameStr);
-//
-//            accountListLayout.addView(child);
-//
-//            accountName.setOnClickListener(new View.OnClickListener() {
-//                final String selectedAccName = accountName.getText().toString();
-//                @Override
-//                public void onClick(View v) {
-//                    try {
-//                        RefreshListener authListener = new RefreshListener(){
-//                            @Override
-//                            public void onFailed(Throwable e) {
-//                                Tools.showError(PojavLoginActivity.this, e);
-//                            }
-//
-//                            @Override
-//                            public void onSuccess(MinecraftAccount out) {
-//                                accountDialog.dismiss();
-//                                mProfile = out;
-//                                playProfile(true);
-//                            }
-//                        };
-//
-//                        MinecraftAccount acc = MinecraftAccount.load(selectedAccName);
-//                        if (acc.isMicrosoft){
-//                            new MicrosoftAuthTask(PojavLoginActivity.this, authListener)
-//                                    .execute("true", acc.msaRefreshToken);
-//                        } else if (acc.accessToken.length() >= 5) {
-//                            PojavProfile.updateTokens(PojavLoginActivity.this, selectedAccName, authListener);
-//                        } else {
-//                            accountDialog.dismiss();
-//                            PojavProfile.launch(PojavLoginActivity.this, selectedAccName);
-//                        }
-//                    } catch (Exception e) {
-//                        Tools.showError(PojavLoginActivity.this, e);
-//                    }
-//                }
-//            });
-//
-//            final int accountIndex_final = accountIndex;
-//            removeButton.setOnClickListener(new View.OnClickListener() {
-//                final String selectedAccName = accountName.getText().toString();
-//                @Override
-//                public void onClick(View v) {
-//                    AlertDialog.Builder builder2 = new AlertDialog.Builder(PojavLoginActivity.this);
-//                    builder2.setTitle(selectedAccName);
-//                    builder2.setMessage(R.string.warning_remove_account);
-//                    builder2.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener(){
-//
-//                        @Override
-//                        public void onClick(DialogInterface p1, int p2) {
-//                            new InvalidateTokenTask(PojavLoginActivity.this).execute(selectedAccName);
-//                            accountListLayout.removeViewsInLayout(accountIndex_final, 1);
-//
-//                            if (accountListLayout.getChildCount() == 0) {
-//                                accountDialog.dismiss(); //No need to keep it, since there is no account
-//                                return;
-//                            }
-//                            //Refreshes the layout with the same settings so it take the missing child into account.
-//                            accountListLayout.setLayoutParams(accountListLayout.getLayoutParams());
-//
-//                        }
-//                    });
-//                    builder2.setNegativeButton(android.R.string.cancel, null);
-//                    builder2.show();
-//                }
-//            });
-//
-//        }
-//        accountDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-//        accountDialog.show();
-//    }
-    
-    private MinecraftAccount loginOffline() {
-        new File(Tools.DIR_ACCOUNT_OLD).mkdir();
-        
-        String text = edit2.getText().toString();
-        if (text.isEmpty()) {
-            edit2.setError(getString(R.string.global_error_field_empty));
-        } else if (text.length() <= 2) {
-            edit2.setError(getString(R.string.login_error_short_username));
-        } else if (new File(Tools.DIR_ACCOUNT_NEW + "/" + text + ".json").exists()) {
-            edit2.setError(getString(R.string.login_error_exist_username));
-        } else {
-            MinecraftAccount builder = new MinecraftAccount();
-            builder.isMicrosoft = false;
-            builder.username = text;
-            
-            return builder;
-        }
-        return null;
-    }
-    
 
     public void loginMC(final View v) {
         // TODO: go to function
@@ -865,34 +674,24 @@ public class LoginActivity extends BaseActivity
             }
         }
     }
-    
-    public static String strArrToString(String[] strArr)
-    {
-        String[] strArrEdit = strArr;
-        strArrEdit[0] = "";
-        
-        String str = Arrays.toString(strArrEdit);
-        str = str.substring(1, str.length() - 1).replace(",", "\n");
-        
-        return str;
-    }
-    //We are calling this method to check the permission status
+
+    // We are calling this method to check the permission status
     private boolean isStorageAllowed() {
-        //Getting the permission status
+        // Getting the permission status
         int result1 = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int result2 = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
 
 
-        //If permission is granted returning true
+        // If permission is granted returning true
         return result1 == PackageManager.PERMISSION_GRANTED &&
             result2 == PackageManager.PERMISSION_GRANTED;
     }
 
-    //Requesting permission
-    private void requestStoragePermission()
-    {
-        ActivityCompat.requestPermissions(this, new String[]{
-            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE_REQUEST_CODE);
+    // Requesting permission
+    private void requestStoragePermission() {
+        ActivityCompat.requestPermissions(this, new String[] {
+                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
+        }, REQUEST_STORAGE_REQUEST_CODE);
     }
 
     // This method will be called when the user will tap on allow or deny
@@ -905,20 +704,13 @@ public class LoginActivity extends BaseActivity
         }
     }
 
-    //When the user have no saved account, you can show him this dialog
-    private void showNoAccountDialog(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-
-
-        builder.setMessage(R.string.login_dialog_no_saved_account)
-                .setTitle(R.string.login_title_no_saved_account)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                    //Fucking nothing
-                });
-
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
+    public void forgotPassword(View view) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://obvilionnetwork.ru/auth/resetpassword"));
+        startActivity(browserIntent);
     }
 
+    public void registerButton(View view) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://obvilionnetwork.ru/auth/signup"));
+        startActivity(browserIntent);
+    }
 }

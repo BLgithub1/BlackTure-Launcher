@@ -23,6 +23,8 @@ import net.kdt.pojavlaunch.utils.*;
 import net.kdt.pojavlaunch.value.*;
 import org.lwjgl.glfw.*;
 
+import net.kdt.pojavlaunch.utils.JREUtils;
+
 public class BaseMainActivity extends LoggableActivity {
     public static volatile ClipboardManager GLOBAL_CLIPBOARD;
     

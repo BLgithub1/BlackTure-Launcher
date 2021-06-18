@@ -4,8 +4,12 @@
     <string name="app_name">Obvilion Network Launсher</string>
     <string name="app_short_name">Obvilion Network Launcher</string>
     <string name="app_motd">Лаунчер для запуска клиента Obvilion Network с модами.</string>
+    <string name="app_based_on">На основе PojavLauncher © Tran Khanh Duy</string>
+
     <!-- Action bar part -->
+
     <!-- Languages list part -->
+
     <!-- Login strings -->
     <string name="login_online_username_hint">Email или имя пользователя</string>
     <string name="login_online_password_hint">Пароль</string>
