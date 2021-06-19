@@ -3,10 +3,14 @@ package ru.obvilion.launcher;
 import android.app.Application;
 import android.os.Environment;
 
+import net.kdt.pojavlaunch.LoginActivity;
+
 import java.io.File;
 
 public class Vars {
     public static Application THIS_APP;
+
+    public static LoginActivity LOGIN_ACTIVITY;
 
     public static File EXT_STORAGE = Environment.getExternalStorageDirectory();
     public static File APP_DATA;

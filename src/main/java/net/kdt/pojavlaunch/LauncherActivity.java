@@ -26,7 +26,6 @@ import androidx.constraintlayout.widget.Guideline;
 import androidx.viewpager.widget.ViewPager;
 
 import net.kdt.pojavlaunch.fragments.ConsoleFragment;
-import net.kdt.pojavlaunch.fragments.LauncherFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferenceFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.value.MinecraftAccount;
@@ -47,10 +46,9 @@ public class LauncherActivity extends BaseLauncherActivity {
 
     private ViewPager viewPager;
 
-    private TextView tvUsernameView;
     private Spinner accountSelector;
     private ViewPagerAdapter viewPageAdapter;
-    private final Button[] Tabs = new Button[3];
+    private final Button[] Tabs = new Button[2];
     private View selected;
 
     private Button logoutBtn; // MineButtons
@@ -74,7 +72,6 @@ public class LauncherActivity extends BaseLauncherActivity {
         mConsoleView = new ConsoleFragment();
 
         viewPageAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-        viewPageAdapter.addFragment(new LauncherFragment(), 0, getString(R.string.mcl_tab_news));
         viewPageAdapter.addFragment(mConsoleView, 0, getString(R.string.mcl_tab_console));
         viewPageAdapter.addFragment(new LauncherPreferenceFragment(), 0, getString(R.string.mcl_option_settings));
 
@@ -95,8 +92,6 @@ public class LauncherActivity extends BaseLauncherActivity {
             }
         });
         viewPager.setAdapter(viewPageAdapter);
-
-        tvUsernameView = (TextView) findViewById(R.id.launchermain_text_welcome);
         mTextVersion = (TextView) findViewById(R.id.launcherMainVersionView);
 
         //The following line is used to make this TextView horizontally scroll if the version name is larger than the view
@@ -104,10 +99,8 @@ public class LauncherActivity extends BaseLauncherActivity {
 
         Tabs[0] = findViewById(R.id.btnTab1);
         Tabs[1] = findViewById(R.id.btnTab2);
-        Tabs[2] = findViewById(R.id.btnTab3);
 
         pickAccount();
-
 
         final List<String> accountList = new ArrayList<String>();
         final MinecraftAccount tempProfile = Profile.getTempProfileContent(this);
@@ -189,8 +182,6 @@ public class LauncherActivity extends BaseLauncherActivity {
     private void pickAccount() {
         try {
             mProfile = Profile.getCurrentProfileContent(this);
-
-            tvUsernameView.setText(getString(R.string.main_welcome, mProfile.username));
         } catch(Exception e) {
             mProfile = new MinecraftAccount();
             Tools.showError(this, e, true);
@@ -226,9 +217,9 @@ public class LauncherActivity extends BaseLauncherActivity {
         Tabs[index].setTextColor(Color.WHITE);
 
         //Animating the white bar on the left
-        ValueAnimator animation = ValueAnimator.ofFloat(selected.getY(), Tabs[index].getY()+(Tabs[index].getHeight()-selected.getHeight())/2f);
+        ValueAnimator animation = ValueAnimator.ofFloat(selected.getX(), Tabs[index].getX());
         animation.setDuration(250);
-        animation.addUpdateListener(animation1 -> selected.setY((float) animation1.getAnimatedValue()));
+        animation.addUpdateListener(animation1 -> selected.setX((float) animation1.getAnimatedValue()));
         animation.start();
     }
 
