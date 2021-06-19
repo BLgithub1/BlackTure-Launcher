@@ -60,29 +60,41 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import ru.obvilion.launcher.Vars;
+import ru.obvilion.launcher.utils.JavaUtils;
+
 public class LoginActivity extends BaseActivity {
     private final Object mLockStoragePerm = new Object();
     private final Object mLockSelectJRE = new Object();
     
     private EditText edit2, edit3;
+    public ProgressBar bar;
+    public TextView startupTextView;
     private final int REQUEST_STORAGE_REQUEST_CODE = 1;
     private CheckBox sRemember;
-    private TextView startupTextView;
-    private SharedPreferences firstLaunchPrefs;
+    public static SharedPreferences firstLaunchPrefs;
     private MinecraftAccount mProfile = null;
     
     private static boolean isSkipInit = false;
-
-    public static final String PREF_IS_INSTALLED_JAVARUNTIME = "isJavaRuntimeInstalled";
     
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState); // false;
 
+        Vars.LOGIN_ACTIVITY = this;
         Tools.updateWindowSize(this);
         
         firstLaunchPrefs = getSharedPreferences("pojav_extract", MODE_PRIVATE);
         new InitTask().execute(isSkipInit);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Tools.updateWindowSize(this);
+
+        // Clear current profile
+        Profile.setCurrentProfile(this, null);
     }
 
     private class InitTask extends AsyncTask<Boolean, String, Integer> {
@@ -96,6 +108,7 @@ public class LoginActivity extends BaseActivity {
 
             FontChanger.changeFonts(startScr);
 
+            bar = (ProgressBar) startScr.findViewById(R.id.startscreenProgress2);
             progress = (ProgressBar) startScr.findViewById(R.id.startscreenProgress);
             startupTextView = (TextView) startScr.findViewById(R.id.startscreen_text);
 
@@ -237,27 +250,6 @@ public class LoginActivity extends BaseActivity {
         sRemember = findViewById(R.id.login_switch_remember);
         isSkipInit = true;
     }
-    
-    @Override
-    public void onResume() {
-        super.onResume();
-        Tools.updateWindowSize(this);
-        
-        // Clear current profile
-        Profile.setCurrentProfile(this, null);
-    }
-
-    private boolean isJavaRuntimeInstalled(AssetManager am) {
-        boolean prefValue = firstLaunchPrefs.getBoolean(PREF_IS_INSTALLED_JAVARUNTIME, false);
-        try {
-            return prefValue && (
-                am.open("components/jre/bin-" + Tools.CURRENT_ARCHITECTURE.split("/")[0] + ".tar.xz") == null ||
-                Tools.read(new FileInputStream(Tools.DIR_HOME_JRE+"/version")).equals(Tools.read(am.open("components/jre/version"))));
-        } catch(IOException e) {
-            Log.e("JVMCtl","failed to read file",e);
-            return prefValue;
-        }
-    }
    
     private void unpackComponent(AssetManager am, String component) throws IOException {
         File versionFile = new File(Tools.DIR_GAME_HOME + "/" + component + "/version");
@@ -339,15 +331,13 @@ public class LoginActivity extends BaseActivity {
             
             unpackComponent(am, "caciocavallo");
             unpackComponent(am, "lwjgl3");
-            if (!isJavaRuntimeInstalled(am)) {
-                if(!installRuntimeAutomatically(am)) {
+            if (!JavaUtils.isJavaRuntimeInstalled()) {
+                if (!JavaUtils.installRuntimeAutomatically()) {
                     File jreTarFile = selectJreTarFile();
                     uncompressTarXZ(jreTarFile, new File(Tools.DIR_HOME_JRE));
-                } else {
-                    //Tools.copyAssetFile(this, "components/jre/version", Tools.DIR_HOME_JRE + "/","version", true);
-
                 }
-                firstLaunchPrefs.edit().putBoolean(PREF_IS_INSTALLED_JAVARUNTIME, true).commit();
+
+                firstLaunchPrefs.edit().putBoolean("isJavaRuntimeInstalled", true).apply();
             }
             
             JREUtils.relocateLibPath(this);
@@ -361,89 +351,9 @@ public class LoginActivity extends BaseActivity {
             // Refresh libraries
             copyDummyNativeLib("libawt_xawt.so");
             // copyDummyNativeLib("libfontconfig.so");
-        }
-        catch(Throwable e){
+        } catch (Throwable e) {
             Tools.showError(this, e);
         }
-    }
-    
-    private boolean installRuntimeAutomatically(AssetManager am) {
-        File rtUniversal = new File(Tools.DIR_HOME_JRE + "/universal.tar.xz");
-        File rtPlatformDependent = new File(Tools.DIR_HOME_JRE + "/cust-bin.tar.xz");
-
-        if (!new File(Tools.DIR_HOME_JRE).exists()) {
-            new File(Tools.DIR_HOME_JRE).mkdirs();
-        } else {
-            //SANITY: remove the existing files
-            for (File f : new File(Tools.DIR_HOME_JRE).listFiles()) {
-                if (f.isDirectory()){
-                    try {
-                        FileUtils.deleteDirectory(f);
-                    } catch(IOException e1) {
-                        Log.e("JREAuto","da fuq is wrong wit ur device? n2",e1);
-                    }
-                } else{
-                    f.delete();
-                }
-            }
-        }
-
-        try {
-            Tools.downloadFileMonitored(
-                    "https://obvilionnetwork.ru/api/files/java/universal.tar.xz",
-                    rtUniversal.getPath(),
-                    new Tools.DownloaderFeedback() {
-                        @Override
-                        public void updateProgress(int curr, int max) {
-
-                        }
-                    }
-            );
-        } catch (IOException e) {
-
-        }
-
-        try {
-            uncompressTarXZ(rtUniversal, new File(Tools.DIR_HOME_JRE));
-        } catch (IOException e){
-            Log.e("JREAuto","Failed to unpack universal. Custom embedded-less build?",e);
-            return false;
-        }
-
-        try {
-            Tools.downloadFileMonitored(
-                    "https://obvilionnetwork.ru/api/files/java/bin-" + Tools.CURRENT_ARCHITECTURE.split("/")[0] + ".tar.xz",
-                    rtPlatformDependent.getPath(),
-                    new Tools.DownloaderFeedback() {
-                        @Override
-                        public void updateProgress(int curr, int max) {
-
-                        }
-                    }
-            );
-        } catch (IOException e) {
-
-        }
-
-        try {
-            uncompressTarXZ(rtPlatformDependent, new File(Tools.DIR_HOME_JRE));
-        } catch (IOException e) {
-            // Something's very wrong, or user's using an unsupported arch (MIPS phone? ARMv6 phone?),
-            // in both cases, redirecting to manual install, and removing the universal stuff
-            for (File f : new File(Tools.DIR_HOME_JRE).listFiles()) {
-                if (f.isDirectory()){
-                    try {
-                        FileUtils.deleteDirectory(f);
-                    } catch(IOException e1) {
-                        Log.e("JREAuto","da fuq is wrong wit ur device?",e1);
-                    }
-                } else{
-                    f.delete();
-                }
-            }
-            return false;
-        }
-        return true;
     }
 
     private void copyDummyNativeLib(String name) throws Throwable {
@@ -459,31 +369,28 @@ public class LoginActivity extends BaseActivity {
     private File selectJreTarFile() throws InterruptedException {
         final StringBuilder selectedFile = new StringBuilder();
         
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                builder.setTitle(getString(R.string.alerttitle_install_jre, Tools.CURRENT_ARCHITECTURE));
-                builder.setCancelable(false);
+        runOnUiThread(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+            builder.setTitle(getString(R.string.alerttitle_install_jre, Tools.CURRENT_ARCHITECTURE));
+            builder.setCancelable(false);
 
-                final AlertDialog dialog = builder.create();
-                FileListView flv = new FileListView(dialog, "tar.xz");
-                flv.setFileSelectedListener(new FileSelectedListener(){
+            final AlertDialog dialog = builder.create();
+            FileListView flv = new FileListView(dialog, "tar.xz");
+            flv.setFileSelectedListener(new FileSelectedListener(){
 
-                        @Override
-                        public void onFileSelected(File file, String path) {
-                            selectedFile.append(path);
-                            dialog.dismiss();
+                    @Override
+                    public void onFileSelected(File file, String path) {
+                        selectedFile.append(path);
+                        dialog.dismiss();
 
-                            synchronized (mLockSelectJRE) {
-                                mLockSelectJRE.notifyAll();
-                            }
-
+                        synchronized (mLockSelectJRE) {
+                            mLockSelectJRE.notifyAll();
                         }
-                    });
-                dialog.setView(flv);
-                dialog.show();
-            }
+
+                    }
+                });
+            dialog.setView(flv);
+            dialog.show();
         });
         
         synchronized (mLockSelectJRE) {
@@ -493,7 +400,7 @@ public class LoginActivity extends BaseActivity {
         return new File(selectedFile.toString());
     }
 
-    private void uncompressTarXZ(final File tarFile, final File dest) throws IOException {
+    public void uncompressTarXZ(final File tarFile, final File dest) throws IOException {
 
         dest.mkdirs();
         TarArchiveInputStream tarIn = null;
@@ -561,14 +468,14 @@ public class LoginActivity extends BaseActivity {
     private static boolean mkdirs(String path) {
         File file = new File(path);
         // check necessary???
-        if(file.getParentFile().exists())
-             return file.mkdir();
-        else return file.mkdirs();
+        if (file.getParentFile().exists()) {
+            return file.mkdir();
+        }
+
+        return file.mkdirs();
     }
 
     public void loginMC(final View v) {
-        // TODO: go to function
-
         String text = edit2.getText().toString();
         if (text.isEmpty()) {
             edit2.setError(getString(R.string.global_error_field_empty));

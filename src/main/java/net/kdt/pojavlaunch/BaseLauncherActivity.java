@@ -19,7 +19,6 @@ import net.kdt.pojavlaunch.value.*;
 public abstract class BaseLauncherActivity extends BaseActivity {
 	public Button mPlayButton;
 	public ConsoleFragment mConsoleView;
-    public CrashFragment mCrashView;
     public ProgressBar mLaunchProgress;
 	public Spinner mVersionSelector;
 	public TextView mLaunchTextStatus, mTextVersion;
@@ -35,50 +34,7 @@ public abstract class BaseLauncherActivity extends BaseActivity {
     public abstract void statusIsLaunching(boolean isLaunching);
 
     public void mcaccLogout(View view) {
-        //PojavProfile.reset();
         finish();
-    }
-
-    
-    public void launcherMenu(View view) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.mcl_options);
-        builder.setItems(R.array.mcl_options, new DialogInterface.OnClickListener(){
-
-                @Override
-                public void onClick(DialogInterface p1, int p2)
-                {
-                    switch (p2) {
-                        case 0: // Mod installer
-                            installMod(false);
-                            break;
-                        case 1: // Mod installer with java args 
-                            installMod(true);
-                            break;
-                        case 2: // Custom controls
-                            startActivity(new Intent(BaseLauncherActivity.this, CustomControlsActivity.class));
-                            break;
-                        case 3: { // About
-                                final AlertDialog.Builder aboutB = new AlertDialog.Builder(BaseLauncherActivity.this);
-                                aboutB.setTitle(R.string.mcl_option_about);
-                                try {
-                                    aboutB.setMessage(Html.fromHtml(String.format(Tools.read(getAssets().open("about_en.txt")),
-                                                                                  Tools.APP_NAME,
-                                                                                  BuildConfig.VERSION_NAME,
-                                                                                  "3.2.3")
-                                                                    ));
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
-                                aboutB.setPositiveButton(android.R.string.ok, null);
-                                AlertDialog aboutDialog = aboutB.show();
-                                TextView aboutTv = aboutDialog.findViewById(android.R.id.message);
-                                aboutTv.setMovementMethod(LinkMovementMethod.getInstance());
-                            } break;
-                    }
-                }
-            });
-        builder.show();
     }
 
     private void installMod(boolean customJavaArgs) {
@@ -128,7 +84,6 @@ public abstract class BaseLauncherActivity extends BaseActivity {
             v.setEnabled(false);
             mTask = new MinecraftDownloaderTask(this);
             mTask.execute(mProfile.selectedVersion);
-            mCrashView.resetCrashLog = true;
         }
     }
     
@@ -212,14 +167,7 @@ public abstract class BaseLauncherActivity extends BaseActivity {
                             });
                     }
                 }).start();
-
-            File lastCrashFile = Tools.lastFileModified(Tools.DIR_HOME_CRASH);
-            if(CrashFragment.isNewCrash(lastCrashFile) || !mCrashView.getLastCrash().isEmpty()){
-                mCrashView.resetCrashLog = false;
-                initTabs(2);
-
-            } /*else throw new Exception();*/
-        } catch(Throwable e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
         System.out.println("call to onResumeFragments; E");

@@ -300,8 +300,6 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
             Tools.showError(mActivity, p1);
         }
         if(!launchWithError) {
-            mActivity.mCrashView.setLastCrash("");
-
             try {
                 /*
                  List<String> jvmArgs = ManagementFactory.getRuntimeMXBean().getInputArguments();

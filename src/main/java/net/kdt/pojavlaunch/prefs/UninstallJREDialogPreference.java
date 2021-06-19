@@ -14,9 +14,6 @@ import org.apache.commons.io.*;
 public class UninstallJREDialogPreference extends Preference implements DialogInterface.OnClickListener
 {
     private AlertDialog mDialog;
-    public UninstallJREDialogPreference(Context ctx) {
-        this(ctx, null);
-    }
     
     public UninstallJREDialogPreference(Context ctx, AttributeSet attrs) {
         super(ctx, attrs);
@@ -42,7 +39,7 @@ public class UninstallJREDialogPreference extends Preference implements DialogIn
                 FileUtils.deleteDirectory(new File(Tools.DIR_HOME_JRE));
                 
                 getContext().getSharedPreferences("pojav_extract", Context.MODE_PRIVATE)
-                    .edit().putBoolean(LoginActivity.PREF_IS_INSTALLED_JAVARUNTIME, false).commit();
+                    .edit().putBoolean("isJavaRuntimeInstalled", false).apply();
 
                 Toast.makeText(getContext(), R.string.toast_uninstalljre_done, Toast.LENGTH_SHORT).show();
             } catch (IOException e) {

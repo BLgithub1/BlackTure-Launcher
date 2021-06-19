@@ -13,8 +13,8 @@
 		android:layout_height="match_parent"
 		android:scaleType="centerCrop"
 		android:src="@drawable/sign_in_background"
-		tools:layout_editor_absoluteX="0dp"
-		tools:layout_editor_absoluteY="0dp"/>
+		tools:layout_editor_absoluteX="128dp"
+		tools:layout_editor_absoluteY="16dp" />
 
 	<TextView
 		android:id="@+id/textView5"
@@ -56,4 +56,15 @@
 		android:layout_marginBottom="16dp"
 		app:layout_constraintBottom_toBottomOf="parent"
 		app:layout_constraintStart_toStartOf="parent" />
+
+	<ProgressBar
+		android:id="@+id/startscreenProgress2"
+		style="?android:attr/progressBarStyleHorizontal"
+		android:layout_width="242dp"
+		android:layout_height="13dp"
+		android:layout_marginStart="36dp"
+		android:layout_marginTop="8dp"
+		android:visibility="invisible"
+		app:layout_constraintStart_toStartOf="@+id/imageView2"
+		app:layout_constraintTop_toBottomOf="@+id/startscreen_text" />
 </androidx.constraintlayout.widget.ConstraintLayout>

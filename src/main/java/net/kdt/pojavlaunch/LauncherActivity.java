@@ -12,9 +12,9 @@ import android.os.Looper;
 import android.support.design.widget.VerticalTabLayout.ViewPagerAdapter;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -26,7 +26,6 @@ import androidx.constraintlayout.widget.Guideline;
 import androidx.viewpager.widget.ViewPager;
 
 import net.kdt.pojavlaunch.fragments.ConsoleFragment;
-import net.kdt.pojavlaunch.fragments.CrashFragment;
 import net.kdt.pojavlaunch.fragments.LauncherFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferenceFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
@@ -35,6 +34,8 @@ import net.kdt.pojavlaunch.value.MinecraftAccount;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import ru.obvilion.launcher.tasks.ImageLoadTask;
 
 import static android.os.Build.VERSION_CODES.P;
 import static net.kdt.pojavlaunch.Tools.ignoreNotch;
@@ -49,7 +50,7 @@ public class LauncherActivity extends BaseLauncherActivity {
     private TextView tvUsernameView;
     private Spinner accountSelector;
     private ViewPagerAdapter viewPageAdapter;
-    private final Button[] Tabs = new Button[4];
+    private final Button[] Tabs = new Button[3];
     private View selected;
 
     private Button logoutBtn; // MineButtons
@@ -71,12 +72,10 @@ public class LauncherActivity extends BaseLauncherActivity {
         selected = findViewById(R.id.viewTabSelected);
 
         mConsoleView = new ConsoleFragment();
-        mCrashView = new CrashFragment();
 
         viewPageAdapter = new ViewPagerAdapter(getSupportFragmentManager());
         viewPageAdapter.addFragment(new LauncherFragment(), 0, getString(R.string.mcl_tab_news));
         viewPageAdapter.addFragment(mConsoleView, 0, getString(R.string.mcl_tab_console));
-        viewPageAdapter.addFragment(mCrashView, 0, getString(R.string.mcl_tab_crash));
         viewPageAdapter.addFragment(new LauncherPreferenceFragment(), 0, getString(R.string.mcl_option_settings));
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -106,8 +105,6 @@ public class LauncherActivity extends BaseLauncherActivity {
         Tabs[0] = findViewById(R.id.btnTab1);
         Tabs[1] = findViewById(R.id.btnTab2);
         Tabs[2] = findViewById(R.id.btnTab3);
-        Tabs[3] = findViewById(R.id.btnTab4);
-
 
         pickAccount();
 
@@ -120,40 +117,15 @@ public class LauncherActivity extends BaseLauncherActivity {
         for (String s : new File(Tools.DIR_ACCOUNT_NEW).list()) {
             accountList.add(s.substring(0, s.length() - 5));
         }
-        
-        ArrayAdapter<String> adapterAcc = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, accountList);
-        adapterAcc.setDropDownViewResource(android.R.layout.simple_list_item_single_choice);
-        accountSelector = (Spinner) findViewById(R.id.launchermain_spinner_account);
-        accountSelector.setAdapter(adapterAcc);
-        if (tempProfile != null) {
-            accountSelector.setSelection(0);
-        } else {
-            for (int i = 0; i < accountList.size(); i++) {
-                String account = accountList.get(i);
-                if (account.equals(mProfile.username)) {
-                    accountSelector.setSelection(i);
-                }
-            }
-        }
 
-        accountSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
-            @Override
-            public void onItemSelected(AdapterView<?> p1, View p2, int position, long p4) {
-                if (tempProfile != null && position == 0) {
-                    Profile.setCurrentProfile(LauncherActivity.this, tempProfile);
-                } else {
-                    Profile.setCurrentProfile(LauncherActivity.this,
-                        accountList.get(position + (tempProfile != null ? 1 : 0)));
-                }
-                pickAccount();
-            }
+        TextView username = findViewById(R.id.launchermain_account_name);
+        username.setText(accountList.get(0));
+        ImageView avatar = findViewById(R.id.account_avatar);
+        new ImageLoadTask(
+                "https://obvilionnetwork.ru/api/users/get/" + accountList.get(0) + "/avatar",
+                avatar
+        ).execute();
 
-            @Override
-            public void onNothingSelected(AdapterView<?> p1) {
-                // TODO: Implement this method
-            }
-        });
-        
         List<String> versions = new ArrayList<String>();
         final File fVers = new File(Tools.DIR_HOME_VERSION);
 
@@ -209,7 +181,7 @@ public class LauncherActivity extends BaseLauncherActivity {
     }
 
 
-    private void selectTabPage(int pageIndex){
+    private void selectTabPage(int pageIndex) {
         viewPager.setCurrentItem(pageIndex);
         setTabActive(pageIndex);
     }
