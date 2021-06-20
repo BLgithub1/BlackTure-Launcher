@@ -77,14 +77,6 @@ public class LauncherActivity extends BaseLauncherActivity {
         viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
         viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
         viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
 
         viewPageAdapter.addFragment(mConsoleView, 0, getString(R.string.mcl_tab_console));
         viewPageAdapter.addFragment(new LauncherPreferenceFragment(), 0, getString(R.string.mcl_option_settings));
@@ -93,12 +85,51 @@ public class LauncherActivity extends BaseLauncherActivity {
             @Override
             public void onPageSelected(int position) {
                 int serversCount = viewPageAdapter.getCount() - 2;
+                ImageView arrow_left = findViewById(R.id.toLeft);
+                ImageView arrow_right = findViewById(R.id.toRight);
 
                 if (position > serversCount - 1) {
+                    if (position > serversCount - 2) {
+                        ValueAnimator animation = ValueAnimator.ofFloat(arrow_right.getAlpha(), 0);
+                        animation.setDuration(300);
+                        animation.addUpdateListener(animation1 -> arrow_right.setAlpha((float) animation1.getAnimatedValue()));
+                        animation.start();
+
+                        animation = ValueAnimator.ofFloat(arrow_left.getAlpha(), 0);
+                        animation.setDuration(300);
+                        animation.addUpdateListener(animation1 -> arrow_left.setAlpha((float) animation1.getAnimatedValue()));
+                        animation.start();
+                    }
+
                     setTabActive(position - serversCount + 1);
                 } else {
                     Vars.LAST_SERVER_TAB = position;
                     setTabActive(0);
+
+                    ValueAnimator animation2;
+                    if (position + 1 == serversCount) {
+                        animation2 = ValueAnimator.ofFloat(arrow_right.getAlpha(), 0);
+                        animation2.setDuration(300);
+                        animation2.addUpdateListener(animation1 -> arrow_right.setAlpha((float) animation1.getAnimatedValue()));
+                    } else {
+                        animation2 = ValueAnimator.ofFloat(arrow_right.getAlpha(), 1);
+                        animation2.setDuration(300);
+                        animation2.addUpdateListener(animation1 -> arrow_right.setAlpha((float) animation1.getAnimatedValue()));
+                    }
+                    animation2.start();
+
+
+                    ValueAnimator animation;
+                    if (position == 0) {
+                        animation = ValueAnimator.ofFloat(arrow_left.getAlpha(), 0);
+                        animation.setDuration(300);
+                        animation.addUpdateListener(animation1 -> arrow_left.setAlpha((float) animation1.getAnimatedValue()));
+                    } else {
+                        animation = ValueAnimator.ofFloat(arrow_left.getAlpha(), 1);
+                        animation.setDuration(300);
+                        animation.addUpdateListener(animation1 -> arrow_left.setAlpha((float) animation1.getAnimatedValue()));
+                    }
+                    animation.start();
                 }
             }
 
@@ -253,8 +284,8 @@ public class LauncherActivity extends BaseLauncherActivity {
     protected void initTabs(int activeTab){
         final Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(() -> {
-            //Do something after 100ms
-            selectTabPage(activeTab);
+            viewPager.setCurrentItem(1);
+            viewPager.setCurrentItem(0);
         }, 500);
     }
 
@@ -297,7 +328,7 @@ public class LauncherActivity extends BaseLauncherActivity {
             //Get the fucking notch height:
             try {
                 PREF_NOTCH_SIZE = getWindow().getDecorView().getRootWindowInsets().getDisplayCutout().getBoundingRects().get(0).width();
-            }catch (Exception e){
+            } catch (Exception e) {
                 Log.i("NOTCH DETECTION", "No notch detected, or the device if in split screen mode");
             }
             Tools.updateWindowSize(this);
