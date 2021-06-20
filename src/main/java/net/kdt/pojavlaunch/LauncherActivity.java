@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.Guideline;
 import androidx.viewpager.widget.ViewPager;
 
 import net.kdt.pojavlaunch.fragments.ConsoleFragment;
+import net.kdt.pojavlaunch.fragments.ServerFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferenceFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.value.MinecraftAccount;
@@ -34,6 +35,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import ru.obvilion.launcher.Vars;
 import ru.obvilion.launcher.tasks.ImageLoadTask;
 
 import static android.os.Build.VERSION_CODES.P;
@@ -45,10 +47,8 @@ import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_NOTCH_SIZE;
 public class LauncherActivity extends BaseLauncherActivity {
 
     private ViewPager viewPager;
-
-    private Spinner accountSelector;
     private ViewPagerAdapter viewPageAdapter;
-    private final Button[] Tabs = new Button[2];
+    private final Button[] Tabs = new Button[3];
     private View selected;
 
     private Button logoutBtn; // MineButtons
@@ -72,13 +72,34 @@ public class LauncherActivity extends BaseLauncherActivity {
         mConsoleView = new ConsoleFragment();
 
         viewPageAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+
         viewPageAdapter.addFragment(mConsoleView, 0, getString(R.string.mcl_tab_console));
         viewPageAdapter.addFragment(new LauncherPreferenceFragment(), 0, getString(R.string.mcl_option_settings));
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                setTabActive(position);
+                int serversCount = viewPageAdapter.getCount() - 2;
+
+                if (position > serversCount - 1) {
+                    setTabActive(position - serversCount + 1);
+                } else {
+                    Vars.LAST_SERVER_TAB = position;
+                    setTabActive(0);
+                }
             }
 
             @Override
@@ -92,13 +113,10 @@ public class LauncherActivity extends BaseLauncherActivity {
             }
         });
         viewPager.setAdapter(viewPageAdapter);
-        mTextVersion = (TextView) findViewById(R.id.launcherMainVersionView);
-
-        //The following line is used to make this TextView horizontally scroll if the version name is larger than the view
-        mTextVersion.setSelected(true);
 
         Tabs[0] = findViewById(R.id.btnTab1);
         Tabs[1] = findViewById(R.id.btnTab2);
+        Tabs[2] = findViewById(R.id.btnTab3);
 
         pickAccount();
 
@@ -155,18 +173,15 @@ public class LauncherActivity extends BaseLauncherActivity {
 
 
         initTabs(0);
-        LauncherPreferences.DEFAULT_PREF.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if(key.equals("hideSidebar")){
-                    changeLookAndFeel(sharedPreferences.getBoolean("hideSidebar",false));
-                    return;
-                }
+        LauncherPreferences.DEFAULT_PREF.registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {
+            if(key.equals("hideSidebar")){
+                changeLookAndFeel(sharedPreferences.getBoolean("hideSidebar",false));
+                return;
+            }
 
-                if(key.equals("ignoreNotch")){
-                    ignoreNotch(sharedPreferences.getBoolean("ignoreNotch", true), LauncherActivity.this);
-                    return;
-                }
+            if(key.equals("ignoreNotch")){
+                ignoreNotch(sharedPreferences.getBoolean("ignoreNotch", true), LauncherActivity.this);
+                return;
             }
         });
         changeLookAndFeel(PREF_HIDE_SIDEBAR);
@@ -175,7 +190,19 @@ public class LauncherActivity extends BaseLauncherActivity {
 
 
     private void selectTabPage(int pageIndex) {
-        viewPager.setCurrentItem(pageIndex);
+        if (pageIndex == 0) {
+            if (viewPager.getCurrentItem() < (viewPageAdapter.getCount() - Tabs.length + 1)) {
+                return;
+            }
+
+            viewPager.setCurrentItem(Vars.LAST_SERVER_TAB);
+            setTabActive(pageIndex);
+            return;
+        }
+
+        int page = (viewPageAdapter.getCount() - Tabs.length + 1) + pageIndex - 1;
+
+        viewPager.setCurrentItem(page);
         setTabActive(pageIndex);
     }
 
@@ -193,26 +220,26 @@ public class LauncherActivity extends BaseLauncherActivity {
         mLaunchProgress.setVisibility(launchVisibility);
         mLaunchTextStatus.setVisibility(launchVisibility);
 
-
         logoutBtn.setEnabled(!isLaunching);
         mVersionSelector.setEnabled(!isLaunching);
         canBack = !isLaunching;
     }
 
     public void onTabClicked(View view) {
-        for(int i=0; i<Tabs.length;i++){
-            if(view.getId() == Tabs[i].getId()) {
+        for (int i = 0; i < Tabs.length; i++) {
+            if (view.getId() == Tabs[i].getId()) {
                 selectTabPage(i);
                 return;
             }
         }
     }
 
-    private void setTabActive(int index){
+    private void setTabActive(int index) {
         for (Button tab : Tabs) {
             tab.setTypeface(null, Typeface.NORMAL);
             tab.setTextColor(Color.rgb(220,220,220)); //Slightly less bright white.
         }
+
         Tabs[index].setTypeface(Tabs[index].getTypeface(), Typeface.BOLD);
         Tabs[index].setTextColor(Color.WHITE);
 
@@ -225,12 +252,9 @@ public class LauncherActivity extends BaseLauncherActivity {
 
     protected void initTabs(int activeTab){
         final Handler handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                //Do something after 100ms
-                selectTabPage(activeTab);
-            }
+        handler.postDelayed(() -> {
+            //Do something after 100ms
+            selectTabPage(activeTab);
         }, 500);
     }
 
@@ -280,5 +304,18 @@ public class LauncherActivity extends BaseLauncherActivity {
         }
     }
 
+    public void toLeft(View view) {
+        int cur = viewPager.getCurrentItem();
+        if (cur - 1 < 0) return;
+
+        viewPager.setCurrentItem(cur - 1, true);
+    }
+
+    public void toRight(View view) {
+        int cur = viewPager.getCurrentItem();
+        if (cur + 2 > viewPageAdapter.getCount()) return;
+
+        viewPager.setCurrentItem(cur + 1, true);
+    }
 }
 

@@ -21,7 +21,7 @@ public abstract class BaseLauncherActivity extends BaseActivity {
 	public ConsoleFragment mConsoleView;
     public ProgressBar mLaunchProgress;
 	public Spinner mVersionSelector;
-	public TextView mLaunchTextStatus, mTextVersion;
+	public TextView mLaunchTextStatus;
     
     public JMinecraftVersionList mVersionList;
 	public MinecraftDownloaderTask mTask;
@@ -111,67 +111,8 @@ public abstract class BaseLauncherActivity extends BaseActivity {
         decorView.setSystemUiVisibility(uiOptions);
         System.out.println("call to onResume; E");
     }
+
     SharedPreferences.OnSharedPreferenceChangeListener listRefreshListener = null;
-    @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-        if(listRefreshListener == null) {
-            final BaseLauncherActivity thiz = this;
-            listRefreshListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-                @Override
-                public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                    if(key.startsWith("vertype_")) {
-                        System.out.println("Verlist update needed!");
-                        new RefreshVersionListTask(thiz).execute();
-                    }
-                }
-            };
-            LauncherPreferences.DEFAULT_PREF.registerOnSharedPreferenceChangeListener(listRefreshListener);
-        }
-        new RefreshVersionListTask(this).execute();
-        System.out.println("call to onResumeFragments");
-        try{
-            final ProgressDialog barrier = new ProgressDialog(this);
-            barrier.setMessage(getString(R.string.global_waiting));
-            barrier.setProgressStyle(barrier.STYLE_SPINNER);
-            barrier.setCancelable(false);
-            barrier.show();
-
-            new Thread(new Runnable(){
-
-                    @Override
-                    public void run()
-                    {
-                        while (mConsoleView == null) {
-                            try {
-                                Thread.sleep(20);
-                            } catch (Throwable th) {}
-                        }
-
-                        try {
-                            Thread.sleep(100);
-                        } catch (Throwable th) {}
-
-                        runOnUiThread(new Runnable() {
-                                @Override
-                                public void run()
-                                {
-                                    try {
-                                        mConsoleView.putLog("");
-                                        barrier.dismiss();
-                                    } catch (Throwable th) {
-                                        startActivity(getIntent());
-                                        finish();
-                                    }
-                                }
-                            });
-                    }
-                }).start();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-        System.out.println("call to onResumeFragments; E");
-    }
     
     // Catching touch exception
     @Override

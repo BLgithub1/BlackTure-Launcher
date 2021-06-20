@@ -129,8 +129,6 @@ public class RefreshVersionListTask extends AsyncTask<Void, Void, ArrayList<Stri
                             Tools.showError(mActivity, e);
                         }
                     }
-
-                    mActivity.mTextVersion.setText(mActivity.getString(R.string.mcl_version_msg, version));
                 }
 
                 @Override
@@ -150,13 +148,7 @@ public class RefreshVersionListTask extends AsyncTask<Void, Void, ArrayList<Stri
                 }
             });
         */
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {  
-                public boolean onMenuItemClick(MenuItem item) {  
-                    return true;  
-                }  
-            });  
-
-        mActivity.mTextVersion.setText(mActivity.getString(R.string.mcl_version_msg,mActivity.mVersionSelector.getSelectedItem()));
+        popup.setOnMenuItemClickListener(item -> true);
     }
     
     private ArrayList<String> filter(JMinecraftVersionList.Version[] list1, File[] list2) {

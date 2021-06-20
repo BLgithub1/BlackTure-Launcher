@@ -65,6 +65,7 @@
     <string name="mcl_option_modinstallwitharg">Запустить установщик мода (с пользовательскими аргументами)</string>
     <string name="mcl_option_customcontrol">Пользовательское управление</string>
     <string name="mcl_option_settings">Настройки</string>
+    <string name="mcl_option_servers">Выбор сервера</string>
     <string name="mcl_option_about">О лаунчере</string>
     <string name="mcl_setting_title_uninstalljre">Удалить Java Runtime</string>
     <string name="mcl_setting_subtitle_uninstalljre">[Требуется перезапуск лаунчера] Это позволит вам переустановить Java Runtime</string>

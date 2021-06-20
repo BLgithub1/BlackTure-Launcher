@@ -12,8 +12,7 @@ import android.graphics.*;
 
 import androidx.fragment.app.Fragment;
 
-public class ConsoleFragment extends Fragment
-{
+public class ConsoleFragment extends Fragment {
 	public TextView consoleView;
 	@Override
 	public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

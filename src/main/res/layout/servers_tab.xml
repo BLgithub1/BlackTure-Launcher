@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_marginEnd="8dp"
+        android:src="@drawable/ic_hitech"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline_desc"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.496" />
+
+    <TextView
+        android:id="@+id/server_description"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingLeft="8dp"
+        android:paddingEnd="43dp"
+        android:lineHeight="19sp"
+        android:textSize="13sp"
+        android:text="Это индустриальный сервер с большим кол-вом технических модов для комфортной игры, который открывает перед вами мир высоких технологий и громадных заводов! Теперь вам не придётся вручную собирать урожай, плавить руду или собирать дроп! Появилось множество вещей, упрощающих жизнь, помогающих в развитии. Тут вы найдёте ваши любимые моды, такие как: Industrial Craft 2, BuildCraft, Forestry, Applied Energistics 2, Thermal Expansion, а так же ещё много чего интересного. Присоединяйся! Иди в ногу со временем!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/guideline_desc"
+        app:layout_constraintTop_toBottomOf="@+id/server_name" />
+
+    <TextView
+        android:id="@+id/server_name"
+        android:layout_width="524dp"
+        android:layout_height="44dp"
+        android:paddingLeft="8dp"
+        android:paddingTop="10dp"
+        android:paddingRight="20dp"
+        android:textStyle="bold"
+        android:text="HiTech"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/guideline_desc"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="195dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
