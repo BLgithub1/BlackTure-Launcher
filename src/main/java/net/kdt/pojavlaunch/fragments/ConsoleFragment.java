@@ -3,6 +3,8 @@ package net.kdt.pojavlaunch.fragments;
 import android.os.*;
 
 import androidx.annotation.Nullable;
+
+import android.util.Log;
 import android.view.*;
 import android.widget.*;
 
@@ -11,6 +13,12 @@ import net.kdt.pojavlaunch.*;
 import android.graphics.*;
 
 import androidx.fragment.app.Fragment;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+import ru.obvilion.launcher.Vars;
 
 public class ConsoleFragment extends Fragment {
 	public TextView consoleView;
@@ -28,10 +36,23 @@ public class ConsoleFragment extends Fragment {
 
 
 	@Override
-	public void onResume()
-	{
+	public void onResume() {
 		super.onResume();
 		consoleView = (TextView) getView().findViewById(R.id.lmaintabconsoleLogTextView);
+
+		if (!Vars.LOG_FILE.exists()){
+			return;
+		}
+
+		String line = null;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(Vars.LOG_FILE));
+			line = br.readLine();
+		} catch (IOException e) {
+			return;
+		}
+
+		consoleView.setText(line);
 	}
 	
 	public void putLog(String str) {

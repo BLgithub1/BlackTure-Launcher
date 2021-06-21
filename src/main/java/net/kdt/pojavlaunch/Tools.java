@@ -65,22 +65,19 @@ public final class Tools
     public static final String LIBNAME_OPTIFINE = "optifine:OptiFine";
 
     public static void launchMinecraft(final LoggableActivity ctx, MinecraftAccount profile, String versionName) throws Throwable {
+        /* Low memory control */
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
-        ((ActivityManager)ctx.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryInfo(mi);
-        if(LauncherPreferences.PREF_RAM_ALLOCATION > (mi.availMem/1048576L)) {
-            ctx.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(ctx)
-                            .setMessage(ctx.getString(R.string.memory_warning_msg,(mi.availMem/1048576L),LauncherPreferences.PREF_RAM_ALLOCATION))
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {}
-                            });
-                    b.show();
-                }
+        ((ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryInfo(mi);
+
+        if (LauncherPreferences.PREF_RAM_ALLOCATION > (mi.availMem/1048576L)) {
+            ctx.runOnUiThread(() -> {
+                androidx.appcompat.app.AlertDialog.Builder b = new androidx.appcompat.app.AlertDialog.Builder(ctx)
+                        .setMessage(ctx.getString(R.string.memory_warning_msg,(mi.availMem/1048576L),LauncherPreferences.PREF_RAM_ALLOCATION))
+                        .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {});
+                b.show();
             });
         }
+
         JMinecraftVersionList.Version versionInfo = Tools.getVersionInfo(null,versionName);
         PerVersionConfig.update();
         PerVersionConfig.VersionConfig pvcConfig = PerVersionConfig.configMap.get(versionName);
@@ -103,7 +100,7 @@ public final class Tools
         if (mcReleaseDate < 20130502 && versionInfo.minimumLauncherVersion < 9){
             ctx.appendlnToLog("AWT-enabled version detected! ("+mcReleaseDate+")");
             getCacioJavaArgs(javaArgList,false);
-        }else{
+        }else {
             getCacioJavaArgs(javaArgList,false); // true
             ctx.appendlnToLog("Headless version detected! ("+mcReleaseDate+")");
         }
@@ -149,26 +146,14 @@ public final class Tools
         
         overrideableArgList.add("-Duser.home=" + new File(Tools.DIR_GAME_NEW).getParent());
         overrideableArgList.add("-Duser.language=" + System.getProperty("user.language"));
-        // overrideableArgList.add("-Duser.timezone=GMT");
 
         overrideableArgList.add("-Dos.name=Linux");
         overrideableArgList.add("-Dos.version=Android-" + Build.VERSION.RELEASE);
 
         overrideableArgList.add("-Dpojav.path.minecraft=" + Tools.DIR_GAME_NEW);
         overrideableArgList.add("-Dpojav.path.private.account=" + Tools.DIR_ACCOUNT_NEW);
-        
-        // javaArgList.add("-Dorg.lwjgl.libname=liblwjgl3.so");
-        // javaArgList.add("-Dorg.lwjgl.system.jemalloc.libname=libjemalloc.so");
-       
-        overrideableArgList.add("-Dorg.lwjgl.opengl.libname=libgl4es_114.so");
-        // overrideableArgList.add("-Dorg.lwjgl.opengl.libname=libgl4es_115.so");
-        
-        // javaArgList.add("-Dorg.lwjgl.opengl.libname=libRegal.so");
 
-        // Enable LWJGL3 debug
-        // overrideableArgList.add("-Dorg.lwjgl.util.Debug=true");
-        // overrideableArgList.add("-Dorg.lwjgl.util.DebugFunctions=true");
-        // overrideableArgList.add("-Dorg.lwjgl.util.DebugLoader=true");
+        overrideableArgList.add("-Dorg.lwjgl.opengl.libname=libgl4es_114.so");
 
         // GLFW Stub width height
         overrideableArgList.add("-Dglfwstub.windowWidth=" + CallbackBridge.windowWidth);

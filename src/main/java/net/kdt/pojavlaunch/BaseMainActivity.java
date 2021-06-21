@@ -189,14 +189,10 @@ public class BaseMainActivity extends LoggableActivity {
             touchPad.setFocusable(false);
             
             this.mousePointer = findViewById(R.id.main_mouse_pointer);
-            this.mousePointer.post(new Runnable(){
-
-                @Override
-                public void run() {
-                    ViewGroup.LayoutParams params = mousePointer.getLayoutParams();
-                    params.width = (int) (36 / 100f * LauncherPreferences.PREF_MOUSESCALE);
-                    params.height = (int) (54 / 100f * LauncherPreferences.PREF_MOUSESCALE);
-                }
+            this.mousePointer.post(() -> {
+                ViewGroup.LayoutParams params = mousePointer.getLayoutParams();
+                params.width = (int) (36 / 100f * LauncherPreferences.PREF_MOUSESCALE);
+                params.height = (int) (54 / 100f * LauncherPreferences.PREF_MOUSESCALE);
             });
 
             this.contentLog = findViewById(R.id.content_log_layout);
@@ -208,15 +204,10 @@ public class BaseMainActivity extends LoggableActivity {
             // this.textLogBehindGL.setTypeface(Typeface.MONOSPACE);
 
             this.textLog.setTypeface(Typeface.MONOSPACE);
-            this.toggleLog.setOnCheckedChangeListener(new ToggleButton.OnCheckedChangeListener(){
-
-                    @Override
-                    public void onCheckedChanged(CompoundButton button, boolean isChecked)
-                    {
-                        isLogAllow = isChecked;
-                        appendToLog("");
-                    }
-                });
+            this.toggleLog.setOnCheckedChangeListener((button, isChecked) -> {
+                isLogAllow = isChecked;
+                appendToLog("");
+            });
 
             this.debugText = findViewById(R.id.content_text_debug);
 
@@ -231,50 +222,40 @@ public class BaseMainActivity extends LoggableActivity {
             AndroidLWJGLKeycode.isBackspaceAfterChar = true; // mVersionInfo.minimumLauncherVersion >= 18;
 */
             placeMouseAt(CallbackBridge.physicalWidth / 2, CallbackBridge.physicalHeight / 2);
-            new Thread(new Runnable(){
-
-                    //private boolean isCapturing = false;
-                    @Override
-                    public void run()
-                    {
-                        while (!isExited) {
-                            if (lastGrab != CallbackBridge.isGrabbing())
-                            mousePointer.post(new Runnable(){
-
-                                    @Override
-                                    public void run()
-                                    {
-                                        if (!CallbackBridge.isGrabbing() && isVirtualMouseEnabled) {
-                                            touchPad.setVisibility(View.VISIBLE);
-                                            placeMouseAt(displayMetrics.widthPixels / 2, displayMetrics.heightPixels / 2);
-                                        }
-
-                                        if (CallbackBridge.isGrabbing() && touchPad.getVisibility() != View.GONE) {
-                                            touchPad.setVisibility(View.GONE);
-                                        }
-                                        /*
-                                        if (isAndroid8OrHigher()) {
-                                            if (!CallbackBridge.isGrabbing() && isCapturing) {
-                                                minecraftGLView.releasePointerCapture();
-                                                minecraftGLView.clearFocus();
-                                                isCapturing = false;
-                                            } else if (CallbackBridge.isGrabbing() && !isCapturing) {
-                                                minecraftGLView.requestFocus();
-                                                minecraftGLView.requestPointerCapture();
-                                                isCapturing = true;
-                                            }
-                                        }
-                                        */
-                                        lastGrab = CallbackBridge.isGrabbing();
-                                    }
-                                });
-
-                            // try {
-                            //     Thread.sleep(100);
-                            // } catch (Throwable th) {}
+            //private boolean isCapturing = false;
+            new Thread(() -> {
+                while (!isExited) {
+                    if (lastGrab != CallbackBridge.isGrabbing())
+                    mousePointer.post(() -> {
+                        if (!CallbackBridge.isGrabbing() && isVirtualMouseEnabled) {
+                            touchPad.setVisibility(View.VISIBLE);
+                            placeMouseAt(displayMetrics.widthPixels / 2, displayMetrics.heightPixels / 2);
                         }
-                    }
-                }, "VirtualMouseGrabThread").start();
+
+                        if (CallbackBridge.isGrabbing() && touchPad.getVisibility() != View.GONE) {
+                            touchPad.setVisibility(View.GONE);
+                        }
+                        /*
+                        if (isAndroid8OrHigher()) {
+                            if (!CallbackBridge.isGrabbing() && isCapturing) {
+                                minecraftGLView.releasePointerCapture();
+                                minecraftGLView.clearFocus();
+                                isCapturing = false;
+                            } else if (CallbackBridge.isGrabbing() && !isCapturing) {
+                                minecraftGLView.requestFocus();
+                                minecraftGLView.requestPointerCapture();
+                                isCapturing = true;
+                            }
+                        }
+                        */
+                        lastGrab = CallbackBridge.isGrabbing();
+                    });
+
+                    // try {
+                    //     Thread.sleep(100);
+                    // } catch (Throwable th) {}
+                }
+            }, "VirtualMouseGrabThread").start();
 
 
             if (isAndroid8OrHigher()) {
@@ -699,18 +680,14 @@ public class BaseMainActivity extends LoggableActivity {
                             
                             JREUtils.setupBridgeWindow(new Surface(texture));
                             
-                            new Thread(new Runnable(){
-
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            Thread.sleep(200);
-                                            runCraft();
-                                        } catch (Throwable e) {
-                                            Tools.showError(BaseMainActivity.this, e, true);
-                                        }
-                                    }
-                                }, "JVM Main thread").start();
+                            new Thread(() -> {
+                                try {
+                                    Thread.sleep(200);
+                                    runCraft();
+                                } catch (Throwable e) {
+                                    Tools.showError(BaseMainActivity.this, e, true);
+                                }
+                            }, "JVM Main thread").start();
                         }
                     }
 
@@ -871,27 +848,6 @@ public class BaseMainActivity extends LoggableActivity {
 
     // private FileObserver mLogObserver;
     private void runCraft() throws Throwable {
-        /* Old logger
-        if (Tools.LAUNCH_TYPE != Tools.LTYPE_PROCESS) {
-            currLogFile = JREUtils.redirectStdio(true);
-            // DEPRECATED constructor (String) api 29
-            mLogObserver = new FileObserver(currLogFile.getAbsolutePath(), FileObserver.MODIFY){
-                @Override
-                public void onEvent(int event, String file) {
-                    try {
-                        if (event == FileObserver.MODIFY && currLogFile.length() > 0l) {
-                            System.out.println(Tools.read(currLogFile.getAbsolutePath()));
-                            Tools.write(currLogFile.getAbsolutePath(), "");
-                        }
-                    } catch (Throwable th) {
-                        Tools.showError(MainActivity.this, th);
-                        mLogObserver.stopWatching();
-                    }
-                }
-            };
-            mLogObserver.startWatching();
-        }
-        */
         
         appendlnToLog("--------- beggining with launcher debug");
         checkLWJGL3Installed();

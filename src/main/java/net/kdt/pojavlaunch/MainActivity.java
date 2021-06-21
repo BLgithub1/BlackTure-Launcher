@@ -29,101 +29,93 @@ public class MainActivity extends BaseMainActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initLayout(R.layout.main_with_customctrl);
-        super.ingameControlsEditorListener = new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
-                switch (menuItem.getItemId()) {
-                    case R.id.menu_ctrl_load:
-                        CustomControlsActivity.load(mControlLayout);
-                        break;
-                    case R.id.menu_ctrl_add:
-                        mControlLayout.addControlButton(new ControlData("New", LWJGLGLFWKeycode.GLFW_KEY_UNKNOWN, 100, 100));
-                        break;
-                    case R.id.menu_ctrl_selectdefault:
-                        CustomControlsActivity.dialogSelectDefaultCtrl(mControlLayout);
-                        break;
-                    case R.id.menu_ctrl_save:
-                        CustomControlsActivity.save(true,mControlLayout);
-                        break;
-                }
-                //Toast.makeText(MainActivity.this, menuItem.getTitle() + ":" + menuItem.getItemId(), Toast.LENGTH_SHORT).show();
-                return true;
+
+        super.ingameControlsEditorListener = menuItem -> {
+            switch (menuItem.getItemId()) {
+                case R.id.menu_ctrl_load:
+                    CustomControlsActivity.load(mControlLayout);
+                    break;
+                case R.id.menu_ctrl_add:
+                    mControlLayout.addControlButton(new ControlData("New", LWJGLGLFWKeycode.GLFW_KEY_UNKNOWN, 100, 100));
+                    break;
+                case R.id.menu_ctrl_selectdefault:
+                    CustomControlsActivity.dialogSelectDefaultCtrl(mControlLayout);
+                    break;
+                case R.id.menu_ctrl_save:
+                    CustomControlsActivity.save(true,mControlLayout);
+                    break;
             }
+            //Toast.makeText(MainActivity.this, menuItem.getTitle() + ":" + menuItem.getItemId(), Toast.LENGTH_SHORT).show();
+            return true;
         };
 
-        mClickListener = new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                if (view instanceof ControlButton) {
-                    ControlButton button = (ControlButton) view;
-                    switch (button.getProperties().keycode) {
-                        case ControlData.SPECIALBTN_KEYBOARD:
-                            showKeyboard();
-                            break;
+        mClickListener = view -> {
+            if (view instanceof ControlButton) {
+                ControlButton button = (ControlButton) view;
+                switch (button.getProperties().keycode) {
+                    case ControlData.SPECIALBTN_KEYBOARD:
+                        showKeyboard();
+                        break;
 
-                        case ControlData.SPECIALBTN_TOGGLECTRL:
-                            mControlLayout.toggleControlVisible();
-                            break;
+                    case ControlData.SPECIALBTN_TOGGLECTRL:
+                        mControlLayout.toggleControlVisible();
+                        break;
 
-                        case ControlData.SPECIALBTN_VIRTUALMOUSE:
-                            toggleMouse(button);
-                            break;
-                    }
+                    case ControlData.SPECIALBTN_VIRTUALMOUSE:
+                        toggleMouse(button);
+                        break;
                 }
             }
         };
         
-        mTouchListener = new View.OnTouchListener(){
-            @Override
-            public boolean onTouch(View view, MotionEvent e) {
-                boolean isDown;
-                switch (e.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN: // 0
-                    case MotionEvent.ACTION_POINTER_DOWN: // 5
-                        isDown = true;
-                        break;
-                    case MotionEvent.ACTION_UP: // 1
-                    case MotionEvent.ACTION_CANCEL: // 3
-                    case MotionEvent.ACTION_POINTER_UP: // 6
-                        isDown = false;
-                        break;
-                    default:
-                        return false;
-                }
-
-                if (view instanceof ControlButton) {
-                    ControlButton button = (ControlButton) view;
-                    switch (button.getProperties().keycode) {
-                        case ControlData.SPECIALBTN_MOUSEPRI:
-                            sendMouseButton(LWJGLGLFWKeycode.GLFW_MOUSE_BUTTON_LEFT, isDown);
-                            break;
-
-                        case ControlData.SPECIALBTN_MOUSEMID:
-                            sendMouseButton(LWJGLGLFWKeycode.GLFW_MOUSE_BUTTON_MIDDLE, isDown);
-                            break;
-
-                        case ControlData.SPECIALBTN_MOUSESEC:
-                            if (CallbackBridge.isGrabbing()) {
-                                sendMouseButton(LWJGLGLFWKeycode.GLFW_MOUSE_BUTTON_RIGHT, isDown);
-                            } else {
-                                CallbackBridge.putMouseEventWithCoords(LWJGLGLFWKeycode.GLFW_MOUSE_BUTTON_RIGHT, isDown ? 1 : 0, CallbackBridge.mouseX, CallbackBridge.mouseY);
-
-                                setRightOverride(isDown);
-                            } 
-                            break;
-                            
-                        case ControlData.SPECIALBTN_SCROLLDOWN:
-                            if(!isDown)CallbackBridge.sendScroll(0, 1d);
-                            break;
-                            
-                        case ControlData.SPECIALBTN_SCROLLUP:
-                            if(!isDown)CallbackBridge.sendScroll(0, -1d);
-                            break;
-                    }
-                }
-
-                return false;
+        mTouchListener = (view, e) -> {
+            boolean isDown;
+            switch (e.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN: // 0
+                case MotionEvent.ACTION_POINTER_DOWN: // 5
+                    isDown = true;
+                    break;
+                case MotionEvent.ACTION_UP: // 1
+                case MotionEvent.ACTION_CANCEL: // 3
+                case MotionEvent.ACTION_POINTER_UP: // 6
+                    isDown = false;
+                    break;
+                default:
+                    return false;
             }
+
+            if (view instanceof ControlButton) {
+                ControlButton button = (ControlButton) view;
+                switch (button.getProperties().keycode) {
+                    case ControlData.SPECIALBTN_MOUSEPRI:
+                        sendMouseButton(LWJGLGLFWKeycode.GLFW_MOUSE_BUTTON_LEFT, isDown);
+                        break;
+
+                    case ControlData.SPECIALBTN_MOUSEMID:
+                        sendMouseButton(LWJGLGLFWKeycode.GLFW_MOUSE_BUTTON_MIDDLE, isDown);
+                        break;
+
+                    case ControlData.SPECIALBTN_MOUSESEC:
+                        if (CallbackBridge.isGrabbing()) {
+                            sendMouseButton(LWJGLGLFWKeycode.GLFW_MOUSE_BUTTON_RIGHT, isDown);
+                        } else {
+                            CallbackBridge.putMouseEventWithCoords(LWJGLGLFWKeycode.GLFW_MOUSE_BUTTON_RIGHT, isDown ? 1 : 0, CallbackBridge.mouseX, CallbackBridge.mouseY);
+
+                            setRightOverride(isDown);
+                        }
+                        break;
+
+                    case ControlData.SPECIALBTN_SCROLLDOWN:
+                        if(!isDown)CallbackBridge.sendScroll(0, 1d);
+                        break;
+
+                    case ControlData.SPECIALBTN_SCROLLUP:
+                        if(!isDown)CallbackBridge.sendScroll(0, -1d);
+                        break;
+                }
+            }
+
+            return false;
         };
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){

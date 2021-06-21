@@ -15,7 +15,7 @@
         android:src="@drawable/sign_in_background"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp"
-        app:tint="#aa000000" />
+        android:foreground="#aa000000" />
 
     <View
         android:id="@+id/shadow_menu"

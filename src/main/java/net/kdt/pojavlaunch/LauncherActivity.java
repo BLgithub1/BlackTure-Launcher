@@ -1,7 +1,6 @@
 package net.kdt.pojavlaunch;
 
 import android.animation.ValueAnimator;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -30,6 +29,8 @@ import net.kdt.pojavlaunch.fragments.ServerFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferenceFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.value.MinecraftAccount;
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,6 +63,8 @@ public class LauncherActivity extends BaseLauncherActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.launcher_menu);
 
+        Vars.LAUNCHER_ACTIVITY = this;
+
         if (BuildConfig.DEBUG) {
             Toast.makeText(this, "Launcher process id: " + android.os.Process.myPid(), Toast.LENGTH_LONG).show();
         }
@@ -73,13 +76,21 @@ public class LauncherActivity extends BaseLauncherActivity {
 
         viewPageAdapter = new ViewPagerAdapter(getSupportFragmentManager());
 
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
-        viewPageAdapter.addFragment(new ServerFragment(), 0, getString(R.string.mcl_option_servers));
+
+        /* Add servers to list */
+        try {
+            for (int i = 0; i < Vars.SERVERS.length(); i++) {
+                JSONObject server = Vars.SERVERS.getJSONObject(i);
+                viewPageAdapter.addFragment(new ServerFragment(server), 0, getString(R.string.mcl_option_servers));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         viewPageAdapter.addFragment(mConsoleView, 0, getString(R.string.mcl_tab_console));
         viewPageAdapter.addFragment(new LauncherPreferenceFragment(), 0, getString(R.string.mcl_option_settings));
+
+        viewPager.setAdapter(viewPageAdapter);
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -105,6 +116,9 @@ public class LauncherActivity extends BaseLauncherActivity {
                 } else {
                     Vars.LAST_SERVER_TAB = position;
                     setTabActive(0);
+
+                    /* Set server background */
+                    ((ServerFragment) viewPageAdapter.getItem(position)).setBG();
 
                     ValueAnimator animation2;
                     if (position + 1 == serversCount) {
@@ -143,7 +157,7 @@ public class LauncherActivity extends BaseLauncherActivity {
 
             }
         });
-        viewPager.setAdapter(viewPageAdapter);
+
 
         Tabs[0] = findViewById(R.id.btnTab1);
         Tabs[1] = findViewById(R.id.btnTab2);
@@ -205,18 +219,25 @@ public class LauncherActivity extends BaseLauncherActivity {
 
         initTabs(0);
         LauncherPreferences.DEFAULT_PREF.registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {
-            if(key.equals("hideSidebar")){
+            if (key.equals("hideSidebar")) {
                 changeLookAndFeel(sharedPreferences.getBoolean("hideSidebar",false));
                 return;
             }
 
-            if(key.equals("ignoreNotch")){
+            if (key.equals("ignoreNotch")) {
                 ignoreNotch(sharedPreferences.getBoolean("ignoreNotch", true), LauncherActivity.this);
                 return;
             }
         });
         changeLookAndFeel(PREF_HIDE_SIDEBAR);
         ignoreNotch(PREF_IGNORE_NOTCH, LauncherActivity.this);
+    }
+
+    public void editBG(String link) {
+        new ImageLoadTask(
+                link,
+                findViewById(R.id.bg2)
+        ).execute();
     }
 
 

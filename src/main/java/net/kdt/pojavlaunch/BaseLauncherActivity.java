@@ -1,20 +1,17 @@
 package net.kdt.pojavlaunch;
 
-import android.app.*;
 import android.content.*;
-import android.text.*;
-import android.text.method.*;
 import android.view.*;
 import android.widget.*;
-import androidx.appcompat.app.*;
 import com.kdt.pickafile.*;
 import java.io.*;
 import net.kdt.pojavlaunch.fragments.*;
-import net.kdt.pojavlaunch.prefs.*;
 import net.kdt.pojavlaunch.tasks.*;
 
 import androidx.appcompat.app.AlertDialog;
 import net.kdt.pojavlaunch.value.*;
+
+import ru.obvilion.launcher.Vars;
 
 public abstract class BaseLauncherActivity extends BaseActivity {
 	public Button mPlayButton;
@@ -83,7 +80,7 @@ public abstract class BaseLauncherActivity extends BaseActivity {
         } else if (canBack) {
             v.setEnabled(false);
             mTask = new MinecraftDownloaderTask(this);
-            mTask.execute(mProfile.selectedVersion);
+            mTask.execute(Vars.LAST_SERVER_TAB + "");
         }
     }
     

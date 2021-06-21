@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/serverIcon"
         android:layout_width="140dp"
         android:layout_height="140dp"
         android:layout_marginEnd="8dp"
@@ -24,7 +24,7 @@
         android:paddingEnd="43dp"
         android:lineHeight="19sp"
         android:textSize="13sp"
-        android:text="Это индустриальный сервер с большим кол-вом технических модов для комфортной игры, который открывает перед вами мир высоких технологий и громадных заводов! Теперь вам не придётся вручную собирать урожай, плавить руду или собирать дроп! Появилось множество вещей, упрощающих жизнь, помогающих в развитии. Тут вы найдёте ваши любимые моды, такие как: Industrial Craft 2, BuildCraft, Forestry, Applied Energistics 2, Thermal Expansion, а так же ещё много чего интересного. Присоединяйся! Иди в ногу со временем!"
+        android:text=""
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/guideline_desc"
@@ -38,7 +38,7 @@
         android:paddingTop="10dp"
         android:paddingRight="20dp"
         android:textStyle="bold"
-        android:text="HiTech"
+        android:text="Not Found"
         android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

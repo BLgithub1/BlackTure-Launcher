@@ -16,8 +16,15 @@ import net.kdt.pojavlaunch.FatalErrorActivity;
 import net.kdt.pojavlaunch.FontChanger;
 import net.kdt.pojavlaunch.R;
 import net.kdt.pojavlaunch.Tools;
+import net.kdt.pojavlaunch.fragments.ServerFragment;
+import net.kdt.pojavlaunch.prefs.LauncherPreferenceFragment;
 import net.kdt.pojavlaunch.utils.*;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import ru.obvilion.launcher.io.DualStream;
+import ru.obvilion.launcher.utils.JsonUtils;
 import ru.obvilion.launcher.utils.SystemUtils;
 
 public class Application extends android.app.Application
@@ -27,6 +34,7 @@ public class Application extends android.app.Application
 	@Override
 	public void onCreate() {
 		Vars.THIS_APP = this;
+
 		setExceptionHandler();
 		
 		try {
@@ -41,6 +49,34 @@ public class Application extends android.app.Application
 
             Vars.APP_DATA = getDir("files", MODE_PRIVATE).getParentFile();
             Vars.ARCHITECTURE = Tools.CURRENT_ARCHITECTURE.split("/")[0];
+
+			try {
+				PrintStream out = new PrintStream(new FileOutputStream(Vars.LOG_FILE));
+				System.setOut(new DualStream(System.out, out));
+				System.setErr(new DualStream(System.err, out));
+			} catch (Exception e) {
+				Log.e("Logger", "Error on set log file");
+			}
+
+			new Thread(() -> {
+				try {
+					JSONObject obj = JsonUtils.readJsonFromUrl("https://obvilionnetwork.ru/api/servers");
+					Vars.SERVERS = obj.getJSONArray("servers");
+
+					JSONArray sorted = new JSONArray();
+					for (int i = 0; i < Vars.SERVERS.length(); i++) {
+						JSONObject server = Vars.SERVERS.getJSONObject(i);
+
+						if (server.getString("type").equals("minecraft")) {
+							sorted.put(Vars.SERVERS.get(i));
+						}
+					}
+
+					Vars.SERVERS = sorted;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}).start();
 
 			FontChanger.initFonts(this);
 		} catch (Throwable th) {
