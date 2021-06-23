@@ -13,8 +13,8 @@
         android:name="ru.obvilion.launcher.Application"
         android:theme="@style/AppTheme"
         android:label="@string/app_name"
-        android:icon="@drawable/ic_launcher"
-        android:roundIcon="@drawable/ic_launcher"
+        android:icon="@drawable/logo"
+        android:roundIcon="@drawable/logo"
         android:resizeableActivity="true"
         android:hasFragileUserData="true"
         android:requestLegacyExternalStorage="true">

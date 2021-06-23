@@ -95,8 +95,6 @@ public class BaseMainActivity extends LoggableActivity {
     public NavigationView.OnNavigationItemSelectedListener ingameControlsEditorListener;
     // private String mQueueText = new String();
 
-    protected JMinecraftVersionList.Version mVersionInfo;
-
     private View.OnTouchListener glTouchListener;
 
     private File logFile;
@@ -134,12 +132,11 @@ public class BaseMainActivity extends LoggableActivity {
             logStream = new PrintStream(logFile.getAbsolutePath());
             
             mProfile = Profile.getCurrentProfileContent(this);
-            mVersionInfo = Tools.getVersionInfo(null,mProfile.selectedVersion);
             
             setTitle("Minecraft " + mProfile.selectedVersion);
             
             // Minecraft 1.13+
-            isInputStackCall = mVersionInfo.arguments != null;
+            isInputStackCall = false;
             
             this.displayMetrics = Tools.getDisplayMetrics(this);
             CallbackBridge.windowWidth = (int) ((float)displayMetrics.widthPixels * scaleFactor);

@@ -24,6 +24,8 @@ import android.view.*;
 
 import net.kdt.pojavlaunch.utils.JREUtils;
 
+import ru.obvilion.launcher.Vars;
+
 import static android.os.Build.VERSION_CODES.P;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_IGNORE_NOTCH;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_NOTCH_SIZE;
@@ -78,40 +80,44 @@ public final class Tools
             });
         }
 
-        JMinecraftVersionList.Version versionInfo = Tools.getVersionInfo(null,versionName);
-        PerVersionConfig.update();
-        PerVersionConfig.VersionConfig pvcConfig = PerVersionConfig.configMap.get(versionName);
-        String gamedirPath;
-        if(pvcConfig != null && pvcConfig.gamePath != null && !pvcConfig.gamePath.isEmpty()) gamedirPath = pvcConfig.gamePath;
-        else gamedirPath = Tools.DIR_GAME_NEW;
-        if(pvcConfig != null && pvcConfig.jvmArgs != null && !pvcConfig.jvmArgs.isEmpty()) LauncherPreferences.PREF_CUSTOM_JAVA_ARGS = pvcConfig.jvmArgs;
-        LoginActivity.disableSplash(gamedirPath);
-        String[] launchArgs = getMinecraftArgs(profile, versionInfo, gamedirPath);
-
-        // ctx.appendlnToLog("Minecraft Args: " + Arrays.toString(launchArgs));
-
-        String launchClassPath = generateLaunchClassPath(versionInfo,versionName);
-
         List<String> javaArgList = new ArrayList<String>();
-        
-        int mcReleaseDate = Integer.parseInt(versionInfo.releaseTime.substring(0, 10).replace("-", ""));
-        // 13w17a: 20130425
-        // 13w18a: 20130502
-        if (mcReleaseDate < 20130502 && versionInfo.minimumLauncherVersion < 9){
-            ctx.appendlnToLog("AWT-enabled version detected! ("+mcReleaseDate+")");
-            getCacioJavaArgs(javaArgList,false);
-        }else {
-            getCacioJavaArgs(javaArgList,false); // true
-            ctx.appendlnToLog("Headless version detected! ("+mcReleaseDate+")");
-        }
-        
-        javaArgList.add("-cp");
-        javaArgList.add(getLWJGL3ClassPath() + ":" + launchClassPath);
+        getCacioJavaArgs(javaArgList,false);
 
-        javaArgList.add(versionInfo.mainClass);
-        javaArgList.addAll(Arrays.asList(launchArgs));
-        // ctx.appendlnToLog("full args: "+javaArgList.toString());
+        javaArgList.add("-cp");
+        javaArgList.add(getLWJGL3ClassPath()
+                + ":" + new File(Vars.SELECTED_SERVER_DIR, "forge.jar").getPath()
+                + ":" + getClassPath(new File(Vars.SELECTED_SERVER_DIR, "libraries")));
+
+        javaArgList.add("net.minecraft.launchwrapper.Launch");
+
+        javaArgList.add("--username"); javaArgList.add(profile.username);
+        javaArgList.add("--version"); javaArgList.add("1.12.2");
+        javaArgList.add("--gameDir"); javaArgList.add(Vars.SELECTED_SERVER_DIR.getPath());
+        javaArgList.add("--assetsDir"); javaArgList.add(new File(Vars.GAME_DIR, "assets/1.12.2").getPath());
+        javaArgList.add("--assetIndex"); javaArgList.add("1.12.2");
+        javaArgList.add("--uuid"); javaArgList.add(profile.profileId);
+        javaArgList.add("--accessToken"); javaArgList.add(profile.accessToken);
+        javaArgList.add("--userType"); javaArgList.add("mojang");
+        javaArgList.add("--versionType"); javaArgList.add("release");
+        javaArgList.add("--userProperties"); javaArgList.add("[]");
+        javaArgList.add("--fullscreen");
+
+        javaArgList.add("--tweakClass"); javaArgList.add("net.minecraftforge.fml.common.launcher.FMLTweaker");
+
         JREUtils.launchJavaVM(ctx, javaArgList);
+    }
+
+    public static String getClassPath(File dir) {
+        String cmd = "";
+        for(File f : dir.listFiles()) {
+            if(f.isDirectory()) {
+                cmd += getClassPath(f);
+            } else {
+                cmd += f.getPath() + ":";
+            }
+        }
+
+        return cmd;
     }
     
     public static void getCacioJavaArgs(List<String> javaArgList, boolean isHeadless) {
@@ -144,14 +150,13 @@ public final class Tools
         overrideableArgList.add("-Djava.home=" + Tools.DIR_HOME_JRE);
         overrideableArgList.add("-Djava.io.tmpdir=" + ctx.getCacheDir().getAbsolutePath());
         
-        overrideableArgList.add("-Duser.home=" + new File(Tools.DIR_GAME_NEW).getParent());
+        overrideableArgList.add("-Duser.home=" + Vars.GAME_DIR);
         overrideableArgList.add("-Duser.language=" + System.getProperty("user.language"));
 
         overrideableArgList.add("-Dos.name=Linux");
         overrideableArgList.add("-Dos.version=Android-" + Build.VERSION.RELEASE);
 
-        overrideableArgList.add("-Dpojav.path.minecraft=" + Tools.DIR_GAME_NEW);
-        overrideableArgList.add("-Dpojav.path.private.account=" + Tools.DIR_ACCOUNT_NEW);
+        overrideableArgList.add("-Dpojav.path.minecraft=" + Vars.SELECTED_SERVER_DIR);
 
         overrideableArgList.add("-Dorg.lwjgl.opengl.libname=libgl4es_114.so");
 

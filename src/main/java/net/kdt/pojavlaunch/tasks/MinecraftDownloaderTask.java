@@ -73,6 +73,7 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
 
             serverDir = new File(Vars.GAME_DIR, serverName);
             serverDir.mkdir();
+            Vars.SELECTED_SERVER_DIR = serverDir;
 
             // TODO: All client size
             clientSize = serverFilesData.getJSONObject("core").getLong("size");
@@ -83,9 +84,10 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
 
             downloadModule(serverFilesData.getJSONObject("core"));
             downloadAllModules(serverFilesData.getJSONArray("libraries"));
-            downloadAllModules(serverFilesData.getJSONArray("natives"));
+            //downloadAllModules(serverFilesData.getJSONArray("natives"));
             downloadAllModules(serverFilesData.getJSONArray("mods"));
-            downloadAllModules(serverFilesData.getJSONArray("other"));
+            //downloadAllModules(serverFilesData.getJSONArray("other"));
+            downloadMobileFix();
 
             mActivity.mIsAssetsProcessing = true;
             mActivity.mPlayButton.post(() -> {
@@ -100,6 +102,21 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
             Log.e("loader", e.getLocalizedMessage());
             return e;
         }
+    }
+
+    private void downloadMobileFix() throws IOException {
+        File target = new File(serverDir, "config/splash.properties");
+        if (target.length() != 374)
+        Tools.downloadFileMonitored(
+                "https://obvilionnetwork.ru/api/files/temp/splash.properties",
+                target.getPath(),
+                new Tools.DownloaderFeedback() {
+                    @Override
+                    public void updateProgress(int curr, int max) {
+                        publishDownloadProgress(target.getName(), curr, max);
+                    }
+                }
+        );
     }
 
     private void downloadModule(JSONObject module) throws JSONException, IOException {

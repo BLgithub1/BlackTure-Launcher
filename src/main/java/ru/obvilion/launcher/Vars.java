@@ -17,6 +17,7 @@ public class Vars {
     public static LoginActivity LOGIN_ACTIVITY;
     public static LauncherActivity LAUNCHER_ACTIVITY;
 
+    public static File SELECTED_SERVER_DIR;
     public static int LAST_SERVER_TAB;
     public static JSONArray SERVERS;
     public static JSONArray SERVERS_FILES;
