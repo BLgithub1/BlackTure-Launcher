@@ -67,7 +67,7 @@ public class Application extends android.app.Application
 					for (int i = 0; i < Vars.SERVERS.length(); i++) {
 						JSONObject server = Vars.SERVERS.getJSONObject(i);
 
-						if (server.getString("type").equals("minecraft")) {
+						if (server.getString("type").equals("Minecraft")) {
 							sorted.put(Vars.SERVERS.get(i));
 						}
 					}
