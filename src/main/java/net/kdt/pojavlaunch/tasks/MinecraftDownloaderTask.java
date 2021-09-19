@@ -86,7 +86,7 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
             downloadAllModules(serverFilesData.getJSONArray("libraries"));
             //downloadAllModules(serverFilesData.getJSONArray("natives"));
             downloadAllModules(serverFilesData.getJSONArray("mods"));
-            //downloadAllModules(serverFilesData.getJSONArray("other"));
+            downloadAllModules(serverFilesData.getJSONArray("other"));
             downloadMobileFix();
 
             mActivity.mIsAssetsProcessing = true;
