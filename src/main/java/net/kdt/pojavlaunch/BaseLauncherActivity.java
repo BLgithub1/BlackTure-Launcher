@@ -12,6 +12,7 @@ import androidx.appcompat.app.AlertDialog;
 import net.kdt.pojavlaunch.value.*;
 
 import ru.obvilion.launcher.Vars;
+import ru.obvilion.launcher.utils.JsonUtils;
 
 public abstract class BaseLauncherActivity extends BaseActivity {
 	public Button mPlayButton;
@@ -31,6 +32,13 @@ public abstract class BaseLauncherActivity extends BaseActivity {
     public abstract void statusIsLaunching(boolean isLaunching);
 
     public void mcaccLogout(View view) {
+        try {
+            Vars.CONFIG.put("pass", "");
+            JsonUtils.writeJsonToFile(Vars.CONFIG, Vars.CONFIG_FILE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         finish();
     }
 

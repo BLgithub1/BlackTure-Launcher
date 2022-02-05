@@ -15,6 +15,7 @@
     <string name="login_online_password_hint">Пароль</string>
     <string name="login_online_check_keeplogin">Запомнить меня</string>
     <string name="login_online_login_label">Войти</string>
+    <string name="login_auto_auth">Автоматическая авторизация...</string>
 
     <string name="login_offline_label">Войти как офлайн учётная запись</string>
 
@@ -22,6 +23,7 @@
     <string name="login_error_exist_username">Это имя пользователя уже существует</string>
     <string name="login_error_user_not_found">Данного пользователя не существует!</string>
     <string name="login_error_invalid_password">Неверный пароль!</string>
+    <string name="login_error_too_many_req">Слишком много запросов! Подождите 1 минуту.</string>
 
     <string name="login_registration_button">Регистрация</string>
     <string name="login_forgot_password">Забыли пароль?</string>

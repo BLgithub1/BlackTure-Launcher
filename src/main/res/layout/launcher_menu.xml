@@ -82,9 +82,8 @@
     <Button
         android:id="@+id/btnTab3"
         android:layout_width="150dp"
-        android:layout_height="51dp"
+        android:layout_height="wrap_content"
 
-        android:layout_marginStart="4dp"
         android:layout_marginEnd="10dp"
 
         android:background="?attr/selectableItemBackground"
@@ -105,13 +104,14 @@
         android:textAllCaps="true"
         android:textColor="#FFFFFF"
         android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/launchermainTabPager"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnTab1"
         android:layout_width="130dp"
-        android:layout_height="51dp"
+        android:layout_height="wrap_content"
 
         android:layout_marginEnd="5dp"
         android:background="?attr/selectableItemBackground"
@@ -129,14 +129,15 @@
         android:textAlignment="center"
         android:textAllCaps="true"
         android:textColor="#FFFFFF"
-        android:textSize="14sp"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toTopOf="@+id/launchermainTabPager"
         app:layout_constraintEnd_toStartOf="@+id/btnTab2"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnTab2"
         android:layout_width="170dp"
-        android:layout_height="51dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="5dp"
 
         android:background="?attr/selectableItemBackground"
@@ -155,7 +156,8 @@
         android:textAlignment="center"
         android:textAllCaps="true"
         android:textColor="#FFFFFF"
-        android:textSize="14sp"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toTopOf="@+id/launchermainTabPager"
         app:layout_constraintEnd_toStartOf="@+id/btnTab3"
         app:layout_constraintTop_toTopOf="parent" />
 

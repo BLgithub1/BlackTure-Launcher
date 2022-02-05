@@ -22,6 +22,7 @@
     <string name="login_error_exist_username">This username already exist</string>
     <string name="login_error_user_not_found">User not found!</string>
     <string name="login_error_invalid_password">Password is invalid!</string>
+    <string name="login_error_too_many_req">Слишком много запросов! Подождите 1 минуту.</string>
 
     <string name="login_registration_button">Sign Up</string>
     <string name="login_forgot_password">Forgot password?</string>
@@ -230,4 +231,5 @@
     <string name="memory_warning_msg">The current amount of free RAM (%d) is lower than allocated RAM (%d), which may lead to crashes. Change the allocation if the game crashes.</string>
     <string name="mcl_memory_allocation">Memory allocation</string>
     <string name="mcl_memory_allocation_subtitle">Controls how much memory is given to Minecraft</string>
+    <string name="login_auto_auth">Automatic authorization...</string>
 </resources>

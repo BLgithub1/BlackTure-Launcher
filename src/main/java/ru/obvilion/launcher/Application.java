@@ -4,6 +4,8 @@ import android.content.*;
 import android.content.pm.*;
 import android.content.res.*;
 import android.os.*;
+
+import androidx.annotation.RequiresApi;
 import androidx.core.app.*;
 
 import android.util.*;
@@ -30,7 +32,7 @@ import ru.obvilion.launcher.utils.SystemUtils;
 public class Application extends android.app.Application
 {
 	public static String CRASH_REPORT_TAG = "ObvilionNetworkCrashReport";
-	
+
 	@Override
 	public void onCreate() {
 		Vars.THIS_APP = this;
@@ -50,20 +52,29 @@ public class Application extends android.app.Application
             Vars.APP_DATA = getDir("files", MODE_PRIVATE).getParentFile();
             Vars.ARCHITECTURE = Tools.CURRENT_ARCHITECTURE.split("/")[0];
 
+			PrintStream old_out = System.out;
+			PrintStream old_err = System.err;
+
 			try {
 				PrintStream out = new PrintStream(new FileOutputStream(Vars.LOG_FILE));
+
 				System.setOut(new DualStream(System.out, out));
 				System.setErr(new DualStream(System.err, out));
 			} catch (Exception e) {
 				Log.e("Logger", "Error on set log file");
+				e.printStackTrace();
+				System.setOut(old_out);
+				System.setErr(old_err);
 			}
 
 			new Thread(() -> {
 				try {
-					JSONObject obj = JsonUtils.readJsonFromUrl("https://obvilionnetwork.ru/api/servers");
+					JSONObject obj = JsonUtils.readJsonFromUrl("https://obvilion.ru/api/servers");
 					Vars.SERVERS = obj.getJSONArray("servers");
 
+					Map<Integer, String> _do = new HashMap<>();
 					JSONArray sorted = new JSONArray();
+					JSONArray temp = new JSONArray();
 					for (int i = 0; i < Vars.SERVERS.length(); i++) {
 						JSONObject server = Vars.SERVERS.getJSONObject(i);
 
@@ -72,7 +83,22 @@ public class Application extends android.app.Application
 						}
 					}
 
-					Vars.SERVERS = sorted;
+					for (int i = 0; i < sorted.length(); i++) {
+						JSONObject tec = sorted.getJSONObject(i);
+						_do.put(i, tec.getString("name"));
+					}
+
+					List<Map.Entry<Integer, String>> entries = new ArrayList<>(_do.entrySet());
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+						entries.sort(Map.Entry.comparingByValue());
+					}
+
+					for (Map.Entry<Integer, String> entry : entries) {
+						temp.put(sorted.getJSONObject(entry.getKey()));
+					}
+
+					Vars.SERVERS = temp;
+					JsonUtils.writeJsonToFile(new JSONObject().put("servers", temp), Vars.SERVERS_JSON);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

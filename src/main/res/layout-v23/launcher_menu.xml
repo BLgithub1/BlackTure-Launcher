@@ -82,7 +82,7 @@
     <Button
         android:id="@+id/btnTab3"
         android:layout_width="150dp"
-        android:layout_height="51dp"
+        android:layout_height="55dp"
 
         android:layout_marginStart="4dp"
         android:layout_marginEnd="10dp"
@@ -111,7 +111,7 @@
     <Button
         android:id="@+id/btnTab1"
         android:layout_width="130dp"
-        android:layout_height="51dp"
+        android:layout_height="55dp"
 
         android:layout_marginEnd="5dp"
         android:background="?attr/selectableItemBackground"
@@ -136,7 +136,7 @@
     <Button
         android:id="@+id/btnTab2"
         android:layout_width="170dp"
-        android:layout_height="51dp"
+        android:layout_height="55dp"
         android:layout_marginEnd="5dp"
 
         android:background="?attr/selectableItemBackground"

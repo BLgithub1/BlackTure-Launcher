@@ -30,6 +30,7 @@ import net.kdt.pojavlaunch.prefs.LauncherPreferenceFragment;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.value.MinecraftAccount;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -46,7 +47,6 @@ import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_IGNORE_NOTCH;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_NOTCH_SIZE;
 
 public class LauncherActivity extends BaseLauncherActivity {
-
     private ViewPager viewPager;
     private ViewPagerAdapter viewPageAdapter;
     private final Button[] Tabs = new Button[3];
@@ -58,7 +58,6 @@ public class LauncherActivity extends BaseLauncherActivity {
     }
 
     @Override
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.launcher_menu);
@@ -75,7 +74,6 @@ public class LauncherActivity extends BaseLauncherActivity {
         mConsoleView = new ConsoleFragment();
 
         viewPageAdapter = new ViewPagerAdapter(getSupportFragmentManager());
-
 
         /* Add servers to list */
         try {
@@ -178,7 +176,7 @@ public class LauncherActivity extends BaseLauncherActivity {
         username.setText(accountList.get(0));
         ImageView avatar = findViewById(R.id.account_avatar);
         new ImageLoadTask(
-                "https://obvilionnetwork.ru/api/users/get/" + accountList.get(0) + "/avatar",
+                "https://obvilion.ru/api/users/" + accountList.get(0) + "/avatar",
                 avatar
         ).execute();
 
@@ -215,7 +213,6 @@ public class LauncherActivity extends BaseLauncherActivity {
         mPlayButton = (Button) findViewById(R.id.launchermainPlayButton);
 
         statusIsLaunching(false);
-
 
         initTabs(0);
         LauncherPreferences.DEFAULT_PREF.registerOnSharedPreferenceChangeListener((sharedPreferences, key) -> {

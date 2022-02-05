@@ -91,10 +91,10 @@ public final class Tools
         javaArgList.add("net.minecraft.launchwrapper.Launch");
 
         javaArgList.add("--username"); javaArgList.add(profile.username);
-        javaArgList.add("--version"); javaArgList.add("1.12.2");
+        javaArgList.add("--version"); javaArgList.add(Vars.SELECTED_SERVER_VERSION);
         javaArgList.add("--gameDir"); javaArgList.add(Vars.SELECTED_SERVER_DIR.getPath());
-        javaArgList.add("--assetsDir"); javaArgList.add(new File(Vars.GAME_DIR, "assets/1.12.2").getPath());
-        javaArgList.add("--assetIndex"); javaArgList.add("1.12.2");
+        javaArgList.add("--assetsDir"); javaArgList.add(new File(Vars.GAME_DIR, "assets/" + Vars.SELECTED_SERVER_VERSION).getPath());
+        javaArgList.add("--assetIndex"); javaArgList.add(Vars.SELECTED_SERVER_VERSION);
         javaArgList.add("--uuid"); javaArgList.add(profile.profileId);
         javaArgList.add("--accessToken"); javaArgList.add(profile.accessToken);
         javaArgList.add("--userType"); javaArgList.add("mojang");
@@ -102,7 +102,13 @@ public final class Tools
         javaArgList.add("--userProperties"); javaArgList.add("[]");
         javaArgList.add("--fullscreen");
 
-        javaArgList.add("--tweakClass"); javaArgList.add("net.minecraftforge.fml.common.launcher.FMLTweaker");
+        javaArgList.add("--tweakClass");
+
+        if (Vars.SELECTED_SERVER_VERSION.equals("1.12.2")) {
+            javaArgList.add("net.minecraftforge.fml.common.launcher.FMLTweaker");
+        } else {
+            javaArgList.add("cpw.mods.fml.common.launcher.FMLTweaker");
+        }
 
         JREUtils.launchJavaVM(ctx, javaArgList);
     }
@@ -770,11 +776,16 @@ public final class Tools
         public abstract void updateProgress(int curr, int max);
     }
     public static void downloadFileMonitored(String urlInput, String nameOutput, DownloaderFeedback monitor) throws IOException {
+        if (nameOutput.contains("BetterLoadingScreen")) return;
+
         File nameOutputFile = new File(nameOutput);
         if (!nameOutputFile.exists()) {
             nameOutputFile.getParentFile().mkdirs();
+        } else {
+            nameOutputFile.delete();
         }
-        HttpURLConnection conn = (HttpURLConnection) new URL(urlInput).openConnection();
+
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlInput.replaceAll(" ", "%20")).openConnection();
         InputStream readStr = conn.getInputStream();
         FileOutputStream fos = new FileOutputStream(nameOutputFile);
         int cur = 0;

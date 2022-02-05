@@ -25,7 +25,7 @@ public class JavaUtils {
             return prefValue && (Tools.read(
                     new FileInputStream(Tools.DIR_HOME_JRE + "/version")
             ).equals(
-                    DownloadUtils.downloadString("https://obvilionnetwork.ru/api/files/java/version")
+                    DownloadUtils.downloadString("https://obvilion.ru/api/files/java/version")
             ));
         } catch(IOException e) {
             Log.e("JVMCtl","failed to read file", e);
@@ -77,7 +77,7 @@ public class JavaUtils {
 
         try {
             Tools.downloadFileMonitored(
-                    "https://obvilionnetwork.ru/api/files/java/universal.tar.xz",
+                    "https://obvilion.ru/api/files/java/universal.tar.xz",
                     rtUniversal.getPath(),
                     fb
             );
@@ -89,7 +89,7 @@ public class JavaUtils {
         try {
             tecFile.set("version");
             Tools.downloadFileMonitored(
-                    "https://obvilionnetwork.ru/api/files/java/version",
+                    "https://obvilion.ru/api/files/java/version",
                     versionFile.getPath(),
                     fb
             );
@@ -108,7 +108,7 @@ public class JavaUtils {
         try {
             tecFile.set("bin-" + Tools.CURRENT_ARCHITECTURE.split("/")[0] + ".tar.xz");
             Tools.downloadFileMonitored(
-                    "https://obvilionnetwork.ru/api/files/java/" + tecFile.get(),
+                    "https://obvilion.ru/api/files/java/" + tecFile.get(),
                     rtPlatformDependent.getPath(),
                     fb
             );

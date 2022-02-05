@@ -30,6 +30,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+import com.kdt.mcgui.MineButton;
 import com.kdt.pickafile.FileListView;
 import com.kdt.pickafile.FileSelectedListener;
 import java.io.BufferedInputStream;
@@ -61,7 +63,9 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import ru.obvilion.launcher.Vars;
+import ru.obvilion.launcher.utils.Base64;
 import ru.obvilion.launcher.utils.JavaUtils;
+import ru.obvilion.launcher.utils.JsonUtils;
 
 public class LoginActivity extends BaseActivity {
     private final Object mLockStoragePerm = new Object();
@@ -74,6 +78,7 @@ public class LoginActivity extends BaseActivity {
     private CheckBox sRemember;
     public static SharedPreferences firstLaunchPrefs;
     private MinecraftAccount mProfile = null;
+    public MineButton auth_button;
     
     private static boolean isSkipInit = false;
     
@@ -246,9 +251,30 @@ public class LoginActivity extends BaseActivity {
             
         edit2 = (EditText) findViewById(R.id.login_edit_email);
         edit3 = (EditText) findViewById(R.id.login_edit_password);
+
+        boolean tr = false;
+
+        try {
+            Vars.CONFIG = JsonUtils.readJsonFromFile(Vars.CONFIG_FILE);
+
+            if (Vars.CONFIG != null) {
+                tr = true;
+                edit2.setText(Base64.decrypt(Vars.CONFIG.getString("login")));
+                edit3.setText(Base64.decrypt(Vars.CONFIG.getString("pass")));
+            }
+        } catch (Exception e) {
+
+        }
         
         sRemember = findViewById(R.id.login_switch_remember);
+        auth_button = (MineButton) findViewById(R.id.mineButton);
         isSkipInit = true;
+
+        if (tr) {
+            auth_button.setEnabled(false);
+            auth_button.setText(getString(R.string.login_auto_auth));
+            loginMC(null);
+        }
     }
    
     private void unpackComponent(AssetManager am, String component) throws IOException {
@@ -476,21 +502,25 @@ public class LoginActivity extends BaseActivity {
     }
 
     public void loginMC(final View v) {
-        String text = edit2.getText().toString();
-        if (text.isEmpty()) {
-            edit2.setError(getString(R.string.global_error_field_empty));
-            return;
-        }
-        if (text.length() <= 2) {
-            edit2.setError(getString(R.string.login_error_short_username));
-            return;
-        }
+        boolean off = v == null;
 
-        v.setEnabled(false);
+        if (!off) {
+            String text = edit2.getText().toString();
+            if (text.isEmpty()) {
+                edit2.setError(getString(R.string.global_error_field_empty));
+                return;
+            }
+            if (text.length() <= 2) {
+                edit2.setError(getString(R.string.login_error_short_username));
+                return;
+            }
+
+            v.setEnabled(false);
+        }
 
         new Thread(() -> {
             try {
-                URL url = new URL("https://obvilionnetwork.ru/api/auth/login");
+                URL url = new URL("https://obvilion.ru/api/auth/login");
                 URLConnection con = url.openConnection();
                 HttpURLConnection http = (HttpURLConnection) con;
                 http.setRequestMethod("POST");
@@ -529,7 +559,7 @@ public class LoginActivity extends BaseActivity {
                     MinecraftAccount builder = new MinecraftAccount();
                     builder.accessToken = result.getString("token");
                     builder.profileId = result.getString("uuid");
-                    builder.username = result.has("username") ? result.getString("username") : edit2.getText().toString();
+                    builder.username = result.has("name") ? result.getString("name") : edit2.getText().toString();
                     builder.isMicrosoft = false;
                     builder.selectedVersion = "1.12.2";
 
@@ -537,32 +567,74 @@ public class LoginActivity extends BaseActivity {
                     // builder.updateSkinFace();
                     mProfile = builder;
 
+                    if (!off && sRemember.isChecked()) {
+                        if (Vars.CONFIG == null) Vars.CONFIG = new JSONObject();
+
+                        Vars.CONFIG.put("login", Base64.encrypt(edit2.getText().toString()));
+                        Vars.CONFIG.put("pass", Base64.encrypt(edit3.getText().toString()));
+                        JsonUtils.writeJsonToFile(Vars.CONFIG, Vars.CONFIG_FILE);
+                    }
+
                     runOnUiThread(() -> {
-                        v.setEnabled(true);
+                        if (!off) v.setEnabled(true);
+
+                        if (off) {
+                            auth_button.setEnabled(true);
+                            auth_button.setText(getString(R.string.login_online_login_label));
+                            edit3.setText("");
+                        }
+
                         playProfile(false);
                     });
                 } else {
-                    if (result.getString("message").equals("User not found.")) {
+                    if (off) {
                         runOnUiThread(() -> {
-                            edit2.setError(getString(R.string.login_error_user_not_found));
-                            v.setEnabled(true);
+                            auth_button.setEnabled(true);
+                            auth_button.setText(getString(R.string.login_online_login_label));
+                            edit3.setText("");
                         });
-
-                        return;
                     }
 
-                    if (result.getString("message").equals("Invalid login data.")) {
-                        runOnUiThread(() -> {
-                            edit3.setError(getString(R.string.login_error_invalid_password));
-                            v.setEnabled(true);
-                        });
+                    if (result.has("error")) {
+                        if (result.getString("error").contains("User not found")) {
+                            runOnUiThread(() -> {
+                                edit2.setError(getString(R.string.login_error_user_not_found));
+                                if (!off) v.setEnabled(true);
+                            });
 
-                        return;
+                            return;
+                        }
+
+                        if (result.getString("error").contains("Invalid password")) {
+                            runOnUiThread(() -> {
+                                edit3.setError(getString(R.string.login_error_invalid_password));
+                                if (!off) v.setEnabled(true);
+                            });
+                        }
+                    } else {
+                        if (result.getString("message").contains("Too many requests")) {
+                            runOnUiThread(() -> {
+                                edit2.setError(getString(R.string.login_error_too_many_req));
+                                if (!off) v.setEnabled(true);
+                            });
+                        }
                     }
                 }
             } catch (Exception e) {
+                if (off) {
+                    runOnUiThread(() -> {
+                        auth_button.setEnabled(true);
+                        auth_button.setText(getString(R.string.login_online_login_label));
+                        edit3.setText("");
+                    });
+                    return;
+                }
+
                 Tools.dialogOnUiThread(LoginActivity.this,
                         getResources().getString(R.string.global_error), e.getLocalizedMessage());
+                runOnUiThread(() -> {
+                    v.setEnabled(true);
+                });
             }
         }).start();
     }
@@ -612,12 +684,12 @@ public class LoginActivity extends BaseActivity {
     }
 
     public void forgotPassword(View view) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://obvilionnetwork.ru/auth/resetpassword"));
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://obvilion.ru/auth/resetpassword"));
         startActivity(browserIntent);
     }
 
     public void registerButton(View view) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://obvilionnetwork.ru/auth/signup"));
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://obvilion.ru/auth/signup"));
         startActivity(browserIntent);
     }
 }

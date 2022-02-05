@@ -25,6 +25,7 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
 
     private int serverID;
     private String serverName;
+    private String serverVersion;
     private JSONObject serverData;
     private JSONObject serverFilesData;
     private long clientSize;
@@ -51,12 +52,13 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
             serverID = Integer.parseInt(p1[0]);
             serverData = Vars.SERVERS.getJSONObject(serverID);
             serverName = serverData.getString("name");
+            serverVersion = serverData.getString("version");
 
             Log.i("loader", "Starting loading version "
                     + serverName
                     /* + " " + serverData.getString("version") */); // TODO: Add version to API
 
-            JSONObject obj = JsonUtils.readJsonFromUrl("https://obvilionnetwork.ru/api/servers/info");
+            JSONObject obj = JsonUtils.readJsonFromUrl("https://obvilion.ru/api/servers/info");
             Vars.SERVERS_FILES = obj.getJSONArray("servers");
 
             /* Get files for client */
@@ -74,6 +76,7 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
             serverDir = new File(Vars.GAME_DIR, serverName);
             serverDir.mkdir();
             Vars.SELECTED_SERVER_DIR = serverDir;
+            Vars.SELECTED_SERVER_VERSION = serverVersion;
 
             // TODO: All client size
             clientSize = serverFilesData.getJSONObject("core").getLong("size");
@@ -85,8 +88,9 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
             downloadModule(serverFilesData.getJSONObject("core"));
             downloadAllModules(serverFilesData.getJSONArray("libraries"));
             //downloadAllModules(serverFilesData.getJSONArray("natives"));
+
             downloadAllModules(serverFilesData.getJSONArray("mods"));
-            downloadAllModules(serverFilesData.getJSONArray("other"));
+            downloadAllModules(serverFilesData.getJSONArray("other"), true);
             downloadMobileFix();
 
             mActivity.mIsAssetsProcessing = true;
@@ -107,27 +111,8 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
     private void downloadMobileFix() throws IOException {
         File target = new File(serverDir, "config/splash.properties");
         if (target.length() != 374)
-        Tools.downloadFileMonitored(
-                "https://obvilionnetwork.ru/api/files/temp/splash.properties",
-                target.getPath(),
-                new Tools.DownloaderFeedback() {
-                    @Override
-                    public void updateProgress(int curr, int max) {
-                        publishDownloadProgress(target.getName(), curr, max);
-                    }
-                }
-        );
-    }
-
-    private void downloadModule(JSONObject module) throws JSONException, IOException {
-        String path = module.getString("path");
-        File target = new File(serverDir, path);
-
-        target.getParentFile().mkdirs();
-
-        if (target.length() != module.getLong("size")) {
             Tools.downloadFileMonitored(
-                    "https://obvilionnetwork.ru/api/files/" + module.getString("link"),
+                    "https://obvilion.ru/api/files/android_fix/splash.properties",
                     target.getPath(),
                     new Tools.DownloaderFeedback() {
                         @Override
@@ -136,12 +121,56 @@ public class MinecraftDownloaderTask extends AsyncTask<String, String, Throwable
                         }
                     }
             );
+
+        File target2 = new File(serverDir, "options.txt");
+        if (!target.exists())
+            Tools.downloadFileMonitored(
+                    "https://obvilion.ru/api/files/android_fix/options.txt",
+                    target2.getPath(),
+                    new Tools.DownloaderFeedback() {
+                        @Override
+                        public void updateProgress(int curr, int max) {
+                            publishDownloadProgress(target2.getName(), curr, max);
+                        }
+                    }
+            );
+    }
+
+    private void downloadModule(JSONObject module) throws JSONException, IOException {
+        downloadModule(module, false);
+    }
+
+    private void downloadModule(JSONObject module, boolean ignore_ex) throws JSONException, IOException {
+        String path = module.getString("path");
+        File target = new File(serverDir, path);
+
+        target.getParentFile().mkdirs();
+
+        if (!target.exists() || target.length() != module.getLong("size") && !ignore_ex) {
+            try {
+                Tools.downloadFileMonitored(
+                        "https://obvilion.ru/api/files?path=" + module.getString("link"),
+                        target.getPath(),
+                        new Tools.DownloaderFeedback() {
+                            @Override
+                            public void updateProgress(int curr, int max) {
+                                publishDownloadProgress(target.getName(), curr, max);
+                            }
+                        }
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private void downloadAllModules(JSONArray modules) throws JSONException, IOException {
+        downloadAllModules(modules, false);
+    }
+
+    private void downloadAllModules(JSONArray modules, boolean ignore_ex) throws JSONException, IOException {
         for (int i = 0; i < modules.length(); i++) {
-            downloadModule(modules.getJSONObject(i));
+            downloadModule(modules.getJSONObject(i), ignore_ex);
         }
     }
 
